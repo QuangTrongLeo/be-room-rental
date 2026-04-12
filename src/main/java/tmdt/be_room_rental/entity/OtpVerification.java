@@ -16,6 +16,6 @@ public class OtpVerification {
     @Id @Builder.Default
     private String id = UUID.randomUUID().toString();
     private String email;
-    private String otpCode;
+    private String otp;
     private LocalDateTime expiredAt;
 }

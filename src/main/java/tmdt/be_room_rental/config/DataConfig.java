@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import tmdt.be_room_rental.entity.User;
 import tmdt.be_room_rental.enums.RoleEnum;
-import tmdt.be_room_rental.repository.UserRepository;
+import tmdt.be_room_rental.repository.auth.UserRepository;
 
 import java.time.LocalDateTime;
 
@@ -36,13 +36,14 @@ public class DataConfig {
                         .username(adminUsername)
                         .email(adminEmail)
                         .password(passwordEncoder.encode(adminPassword))
-                        .role(RoleEnum.ADMIN.name())
+                        .role(RoleEnum.ADMIN)
                         .createdAt(LocalDateTime.now())
-                        .enabled(true)
+                        .isVerified(true)
+                        .isActive(true)
+                        .provider("LOCAL")
                         .build();
 
                 userRepository.save(admin);
-            } else {
             }
         };
     }

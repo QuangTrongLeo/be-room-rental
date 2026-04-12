@@ -1,12 +1,15 @@
-package tmdt.be_room_rental.dto.req.auth;
+package tmdt.be_room_rental.dto.res.auth;
 
+import lombok.Builder;
 import lombok.Data;
 import tmdt.be_room_rental.enums.RoleEnum;
 
 @Data
-public class RegisterRequest {
+@Builder
+public class UserResponse {
+    private String id;
     private String username;
     private String email;
-    private String password;
+    private String phone;
     private RoleEnum role;
 }
