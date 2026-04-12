@@ -3,9 +3,7 @@ package tmdt.be_room_rental.controller.auth;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import tmdt.be_room_rental.dto.req.auth.LoginRequest;
-import tmdt.be_room_rental.dto.req.auth.RegisterRequest;
-import tmdt.be_room_rental.dto.req.auth.VerifyOtpRequest;
+import tmdt.be_room_rental.dto.req.auth.*;
 import tmdt.be_room_rental.dto.res.ApiResponse;
 import tmdt.be_room_rental.dto.res.auth.TokenResponse;
 import tmdt.be_room_rental.service.interfaces.auth.IAuthService;
@@ -34,6 +32,24 @@ public class AuthController {
                 .code(HttpStatus.OK.value())
                 .message("Xác thực tài khoản thành công.")
                 .data(null)
+                .build();
+    }
+
+    @PostMapping("/forget-password")
+    public ApiResponse<Void> forgetPassword(@RequestBody ForgetPasswordRequest request) {
+        authService.forgetPassword(request);
+        return ApiResponse.<Void>builder()
+                .code(HttpStatus.OK.value())
+                .message("Mã OTP đặt lại mật khẩu đã được gửi.")
+                .build();
+    }
+
+    @PostMapping("/reset-password")
+    public ApiResponse<Void> resetPassword(@RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request);
+        return ApiResponse.<Void>builder()
+                .code(HttpStatus.OK.value())
+                .message("Mật khẩu đã được thay đổi thành công.")
                 .build();
     }
 

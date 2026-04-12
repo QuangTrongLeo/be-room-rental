@@ -4,17 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tmdt.be_room_rental.dto.req.auth.LoginRequest;
-import tmdt.be_room_rental.dto.req.auth.RegisterRequest;
-import tmdt.be_room_rental.dto.req.auth.VerifyOtpRequest;
+import tmdt.be_room_rental.dto.req.auth.*;
 import tmdt.be_room_rental.dto.res.auth.TokenResponse;
 import tmdt.be_room_rental.entity.User;
 import tmdt.be_room_rental.mapper.auth.TokenMapper;
 import tmdt.be_room_rental.repository.auth.UserRepository;
 import tmdt.be_room_rental.service.interfaces.auth.IAuthService;
 import tmdt.be_room_rental.service.interfaces.auth.IOtpService;
-
-import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -45,6 +41,33 @@ public class AuthService implements IAuthService {
     @Override
     public void verifyOtp(VerifyOtpRequest request) {
         otpService.verifyOtp(request);
+    }
+
+    @Override
+    @Transactional
+    public void forgetPassword(ForgetPasswordRequest request) {
+        if (!userRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Email không tồn tại trong hệ thống");
+        }
+        otpService.createAndSendOtp(request.getEmail());
+    }
+
+    @Override
+    @Transactional
+    public void resetPassword(ResetPasswordRequest request) {
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new RuntimeException("Mật khẩu xác nhận không khớp");
+        }
+
+        VerifyOtpRequest verifyRequest = new VerifyOtpRequest();
+        verifyRequest.setEmail(request.getEmail());
+        verifyRequest.setOtp(request.getOtp());
+
+        otpService.verifyOtp(verifyRequest);
+
+        User user = userService.getUserByEmail(request.getEmail());
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
     }
 
     @Override
