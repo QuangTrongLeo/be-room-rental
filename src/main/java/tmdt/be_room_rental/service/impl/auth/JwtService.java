@@ -1,4 +1,4 @@
-package tmdt.be_room_rental.service.impl;
+package tmdt.be_room_rental.service.impl.auth;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
