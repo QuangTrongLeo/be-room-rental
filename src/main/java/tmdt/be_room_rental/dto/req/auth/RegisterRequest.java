@@ -1,6 +1,7 @@
 package tmdt.be_room_rental.dto.req.auth;
 
 import lombok.Data;
+import tmdt.be_room_rental.enums.ProviderType;
 import tmdt.be_room_rental.enums.RoleEnum;
 
 @Data
@@ -9,4 +10,5 @@ public class RegisterRequest {
     private String email;
     private String password;
     private RoleEnum role;
+    private ProviderType provider;
 }

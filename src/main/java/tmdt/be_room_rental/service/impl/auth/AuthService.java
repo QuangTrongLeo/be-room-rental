@@ -9,7 +9,6 @@ import tmdt.be_room_rental.dto.req.auth.RegisterRequest;
 import tmdt.be_room_rental.dto.req.auth.VerifyOtpRequest;
 import tmdt.be_room_rental.dto.res.auth.TokenResponse;
 import tmdt.be_room_rental.entity.User;
-import tmdt.be_room_rental.enums.RoleEnum;
 import tmdt.be_room_rental.mapper.auth.TokenMapper;
 import tmdt.be_room_rental.repository.auth.UserRepository;
 import tmdt.be_room_rental.service.interfaces.auth.IAuthService;
@@ -37,18 +36,7 @@ public class AuthService implements IAuthService {
         }
 
         // 2. Tạo User mới (Chưa verified)
-        User user = User.builder()
-                .username(request.getUsername())
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .role(RoleEnum.USER) // Mặc định là người đi thuê
-                .isVerified(false)
-                .isActive(true)
-                .provider("LOCAL")
-                .createdAt(LocalDateTime.now())
-                .build();
-
-        userRepository.save(user);
+        User user = userService.createUser(request);
 
         // 3. Tạo và gửi OTP
         otpService.createAndSendOtp(user.getEmail());

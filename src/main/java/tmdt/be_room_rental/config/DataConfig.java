@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import tmdt.be_room_rental.entity.User;
+import tmdt.be_room_rental.enums.ProviderType;
 import tmdt.be_room_rental.enums.RoleEnum;
 import tmdt.be_room_rental.repository.auth.UserRepository;
 
@@ -40,7 +41,7 @@ public class DataConfig {
                         .createdAt(LocalDateTime.now())
                         .isVerified(true)
                         .isActive(true)
-                        .provider("LOCAL")
+                        .provider(ProviderType.EMAIL)
                         .build();
 
                 userRepository.save(admin);

@@ -5,6 +5,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import tmdt.be_room_rental.dto.req.auth.RegisterRequest;
 import tmdt.be_room_rental.entity.User;
+import tmdt.be_room_rental.enums.ProviderType;
 import tmdt.be_room_rental.enums.RoleEnum;
 import tmdt.be_room_rental.repository.auth.UserRepository;
 
@@ -19,6 +20,8 @@ public class UserService {
     public User createUser(RegisterRequest request) {
         RoleEnum role = determineRole(request.getRole());
 
+        ProviderType provider = determineProvider(request.getProvider());
+
         User user = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
@@ -26,7 +29,7 @@ public class UserService {
                 .role(role)
                 .isVerified(false)
                 .isActive(true)
-                .provider("LOCAL")
+                .provider(provider)
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -49,5 +52,12 @@ public class UserService {
             return RoleEnum.USER;
         }
         return requestedRole;
+    }
+
+    private ProviderType determineProvider(ProviderType requestedProvider) {
+        if (requestedProvider == null) {
+            return ProviderType.EMAIL;
+        }
+        return requestedProvider;
     }
 }

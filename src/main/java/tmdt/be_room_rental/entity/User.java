@@ -4,6 +4,7 @@ import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import tmdt.be_room_rental.enums.ProviderType;
 import tmdt.be_room_rental.enums.RoleEnum;
 
 import java.time.LocalDateTime;
@@ -23,6 +24,6 @@ public class User {
     private RoleEnum role;
     private boolean isVerified = false;
     private boolean isActive = true;
-    private String provider; // LOCAL, GOOGLE
+    private ProviderType provider;
     private LocalDateTime createdAt;
 }
