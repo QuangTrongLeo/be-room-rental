@@ -51,6 +51,7 @@ public class UserService implements IUserService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .phone(request.getPhone())
+                .avatar("")
                 .role(role)
                 .isVerified(false)
                 .isActive(true)
