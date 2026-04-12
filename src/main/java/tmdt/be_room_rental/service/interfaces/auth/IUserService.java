@@ -6,10 +6,7 @@ import tmdt.be_room_rental.entity.User;
 import java.util.List;
 
 public interface IUserService {
-    UserResponse createUser(User user);
-    UserResponse updateUser(User user);
-    void deleteUser(User user);
-    UserResponse getMyProfile(User user);
-    UserResponse getUserById(User user);
+    UserResponse getMyProfile();
+    UserResponse getUserById(String id);
     List<UserResponse> getAllUsers();
 }

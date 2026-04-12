@@ -1,4 +1,4 @@
-package tmdt.be_room_rental.controller;
+package tmdt.be_room_rental.controller.auth;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

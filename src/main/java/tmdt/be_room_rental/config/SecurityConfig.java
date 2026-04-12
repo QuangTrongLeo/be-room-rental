@@ -26,19 +26,15 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        
-        String[] endpoints = {
-                "/auth/**",
-                "/users/**",
-                "/public/**"
-        };
+
+        String[] publicEndpoints = { "/auth/**", "/public/**" };
 
         return http
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(endpoints).permitAll()
+                        .requestMatchers(publicEndpoints).permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
