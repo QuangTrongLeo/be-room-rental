@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import tmdt.be_room_rental.dto.req.auth.ProfileRequest;
 import tmdt.be_room_rental.dto.res.ApiResponse;
 import tmdt.be_room_rental.dto.res.auth.UserResponse;
 import tmdt.be_room_rental.service.interfaces.auth.IUserService;
@@ -17,13 +18,24 @@ public class UserController {
 
     private final IUserService userService;
 
-    @GetMapping("/my-profile")
+    @GetMapping("/profile")
     @PreAuthorize("hasAnyRole('ADMIN', 'LANDLORD', 'USER')")
     public ApiResponse<UserResponse> getMyProfile() {
         UserResponse userResponse = userService.getMyProfile();
         return ApiResponse.<UserResponse>builder()
                 .code(HttpStatus.OK.value())
                 .message("Lấy thông tin cá nhân thành công.")
+                .data(userResponse)
+                .build();
+    }
+
+    @PutMapping("/profile")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LANDLORD', 'USER')")
+    public ApiResponse<UserResponse> updateMyProfile(@ModelAttribute ProfileRequest request) {
+        UserResponse userResponse = userService.updateMyProfile(request);
+        return ApiResponse.<UserResponse>builder()
+                .code(HttpStatus.OK.value())
+                .message("Cập nhật thông tin cá nhân thành công.")
                 .data(userResponse)
                 .build();
     }
