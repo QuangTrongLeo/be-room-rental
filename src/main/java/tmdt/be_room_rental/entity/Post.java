@@ -20,14 +20,14 @@ public class Post {
     @Id
     @Builder.Default
     private String id = UUID.randomUUID().toString();
-    private String roomId; // Trỏ về Room
+    private String roomId;
     private String landlordId;
     private String title;
-    private String description;
+    private String content;
     private double price;
     private PostStatus status;
     private boolean isBoosted; // Đánh dấu bài này có đang trong gói đẩy tin không
-    private int viewCount;
+    private int views = 0;
+    private int favorites = 0;
     private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 }

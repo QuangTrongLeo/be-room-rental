@@ -12,11 +12,8 @@ import java.util.List;
 public class RoomResponse {
     private String id;
     private String landlordId;
-    private String name;
     private String address;
-    private String description;
     private double area;
-    private double price;
     private List<String> amenities;
     private List<String> images;
     private RoomType roomType;
