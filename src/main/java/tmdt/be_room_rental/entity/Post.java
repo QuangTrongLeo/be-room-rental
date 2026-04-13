@@ -25,8 +25,8 @@ public class Post {
     private String title;
     private String content;
     private double price;
-    private PostStatus status;
-    private boolean isBoosted; // Đánh dấu bài này có đang trong gói đẩy tin không
+    private PostStatus status = PostStatus.PENDING;
+    private boolean isBoosted = false;
     private int views = 0;
     private int favorites = 0;
     private LocalDateTime createdAt;
