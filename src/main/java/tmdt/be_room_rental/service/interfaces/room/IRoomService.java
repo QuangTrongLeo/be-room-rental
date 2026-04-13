@@ -11,6 +11,7 @@ public interface IRoomService {
     RoomResponse updateRoom(String id, RoomRequest request);
     RoomResponse getRoomById(String id);
     List<RoomResponse> getRooms();
+    List<RoomResponse> getRoomsByLandLord();
     void deleteRoom(String id);
     List<RoomTypeResponse> getRoomTypes();
 }

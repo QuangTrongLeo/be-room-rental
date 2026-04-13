@@ -62,6 +62,17 @@ public class RoomController {
                 .build();
     }
 
+    @GetMapping("/my-rooms")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LANDLORD')")
+    public ApiResponse<List<RoomResponse>> getMyRooms() {
+        List<RoomResponse> response = roomService.getRoomsByLandLord();
+        return ApiResponse.<List<RoomResponse>>builder()
+                .code(200)
+                .message("Lấy danh sách phòng của bạn thành công.")
+                .data(response)
+                .build();
+    }
+
     @GetMapping
     public ApiResponse<List<RoomResponse>> getRooms() {
         List<RoomResponse> response = roomService.getRooms();

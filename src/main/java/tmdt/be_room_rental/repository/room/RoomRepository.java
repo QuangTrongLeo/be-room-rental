@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface RoomRepository extends MongoRepository<Room, String> {
     List<Room> findAllByOrderByCreatedAtDesc();
+    List<Room> findAllByLandlordIdOrderByCreatedAtDesc(String landlordId);
 }

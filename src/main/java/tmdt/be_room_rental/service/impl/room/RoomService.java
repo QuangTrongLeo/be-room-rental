@@ -93,6 +93,13 @@ public class RoomService implements IRoomService {
     }
 
     @Override
+    public List<RoomResponse> getRoomsByLandLord() {
+        User currentUser = securityService.getCurrentUser();
+        List<Room> rooms = roomRepository.findAllByLandlordIdOrderByCreatedAtDesc(currentUser.getId());
+        return roomMapper.toResponseList(rooms);
+    }
+
+    @Override
     public void deleteRoom(String id) {
         Room room = findRoomById(id);
         User currentUser = securityService.getCurrentUser();
