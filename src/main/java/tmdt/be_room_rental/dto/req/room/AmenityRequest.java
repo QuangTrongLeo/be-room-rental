@@ -4,6 +4,5 @@ import lombok.Data;
 
 @Data
 public class AmenityRequest {
-    private String id;
     private String name;
 }

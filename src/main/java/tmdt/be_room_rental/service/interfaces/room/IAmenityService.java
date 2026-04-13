@@ -7,7 +7,8 @@ import java.util.List;
 
 public interface IAmenityService {
     AmenityResponse createAmenity(AmenityRequest request);
-    AmenityResponse updateAmenity(AmenityRequest request);
+    AmenityResponse updateAmenity(String id, AmenityRequest request);
+    AmenityResponse getAmenityById(String id);
     void deleteAmenity(String id);
     List<AmenityResponse> getAmenities();
 }

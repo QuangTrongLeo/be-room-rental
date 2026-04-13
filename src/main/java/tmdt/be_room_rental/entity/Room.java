@@ -17,10 +17,11 @@ public class Room {
     @Id @Builder.Default
     private String id = UUID.randomUUID().toString();
     private String landlordId;
+    private String name;
     private String address;
+    private String description;
     private double area; // Diện tích
     private double price;
-    private double description;
     private List<String> amenities;
     private List<String> images;
     private RoomType roomType;

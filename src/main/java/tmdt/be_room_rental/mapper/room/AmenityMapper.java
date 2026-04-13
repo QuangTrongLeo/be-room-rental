@@ -16,6 +16,7 @@ public class AmenityMapper {
         return AmenityResponse.builder()
                 .id(amenity.getId())
                 .name(amenity.getName())
+                .createdAt(amenity.getCreatedAt())
                 .build();
     }
 

@@ -9,6 +9,7 @@ import tmdt.be_room_rental.mapper.room.AmenityMapper;
 import tmdt.be_room_rental.repository.room.AmenityRepository;
 import tmdt.be_room_rental.service.interfaces.room.IAmenityService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -25,16 +26,24 @@ public class AmenityService implements IAmenityService {
 
         Amenity amenity = Amenity.builder()
                 .name(request.getName())
+                .createdAt(LocalDateTime.now())
                 .build();
 
+        Amenity savedAmenity = amenityRepository.save(amenity);
+
+        return amenityMapper.toResponse(savedAmenity);
+    }
+
+    @Override
+    public AmenityResponse updateAmenity(String id, AmenityRequest request) {
+        Amenity amenity = findAmenityById(id);
+        amenity.setName(request.getName());
         return amenityMapper.toResponse(amenityRepository.save(amenity));
     }
 
     @Override
-    public AmenityResponse updateAmenity(AmenityRequest request) {
-        Amenity amenity = findAmenityById(request.getId());
-        amenity.setName(request.getName());
-        return amenityMapper.toResponse(amenityRepository.save(amenity));
+    public AmenityResponse getAmenityById(String id) {
+        return amenityMapper.toResponse(findAmenityById(id));
     }
 
     @Override
@@ -47,7 +56,7 @@ public class AmenityService implements IAmenityService {
 
     @Override
     public List<AmenityResponse> getAmenities() {
-        return amenityMapper.toResponseList(amenityRepository.findAll());
+        return amenityMapper.toResponseList(amenityRepository.findAllByOrderByCreatedAtDesc());
     }
 
     public Amenity findAmenityById(String id) {
