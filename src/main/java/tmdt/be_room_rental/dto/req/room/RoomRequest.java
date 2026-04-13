@@ -11,17 +11,11 @@ import java.util.List;
 
 @Data
 public class RoomRequest {
-    @NotBlank(message = "Địa chỉ không được để trống")
     private String address;
-    @Positive(message = "Diện tích phải lớn hơn 0")
     private double area;
-
     private List<String> amenities;
     private List<MultipartFile> images;
-
-    @NotNull(message = "Loại phòng không được để trống")
     private RoomType roomType;
-
-    private Double longitude;
     private Double latitude;
+    private Double longitude;
 }

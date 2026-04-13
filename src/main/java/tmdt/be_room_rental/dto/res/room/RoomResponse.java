@@ -17,7 +17,7 @@ public class RoomResponse {
     private List<String> amenities;
     private List<String> images;
     private RoomType roomType;
-    private Double longitude;
     private Double latitude;
+    private Double longitude;
     private LocalDateTime createdAt;
 }
