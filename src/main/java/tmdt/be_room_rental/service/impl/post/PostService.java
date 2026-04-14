@@ -12,6 +12,7 @@ import tmdt.be_room_rental.mapper.post.PostMapper;
 import tmdt.be_room_rental.repository.post.PostRepository;
 import tmdt.be_room_rental.repository.room.RoomRepository;
 import tmdt.be_room_rental.service.impl.auth.SecurityService;
+import tmdt.be_room_rental.service.impl.room.RoomService;
 import tmdt.be_room_rental.service.interfaces.post.IPostService;
 
 import java.time.LocalDateTime;
@@ -21,17 +22,16 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PostService implements IPostService {
     private final PostRepository postRepository;
-    private final RoomRepository roomRepository;
-    private final PostMapper postMapper;
+    private final RoomService roomService;
     private final SecurityService securityService;
+    private final PostMapper postMapper;
 
     @Override
     public PostResponse createPost(PostRequest request) {
         User currentUser = securityService.getCurrentUser();
 
         // 1. Kiểm tra phòng có tồn tại không
-        Room room = roomRepository.findById(request.getRoomId())
-                .orElseThrow(() -> new RuntimeException("Phòng không tồn tại"));
+        Room room = roomService.findRoomById(request.getRoomId());
 
         // 2. Kiểm tra phòng có thuộc về chủ trọ đang đăng nhập không
         if (!room.getLandlordId().equals(currentUser.getId())) {
@@ -46,7 +46,7 @@ public class PostService implements IPostService {
                 .content(request.getContent())
                 .price(request.getPrice())
                 .status(request.getStatus() != null ? request.getStatus() : PostStatus.PENDING)
-                .isBoosted(request.isBoosted())
+                .isBoosted(request.getIsBoosted() != null ? request.getIsBoosted() : false)
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -64,13 +64,33 @@ public class PostService implements IPostService {
         }
 
         // Cập nhật các trường thông tin
-        post.setTitle(request.getTitle());
-        post.setContent(request.getContent());
-        post.setPrice(request.getPrice());
+        if (request.getTitle() != null) post.setTitle(request.getTitle());
+        if (request.getContent() != null) post.setContent(request.getContent());
+        if (request.getPrice() != null) post.setPrice(request.getPrice());
         if (request.getStatus() != null) post.setStatus(request.getStatus());
-        post.setBoosted(request.isBoosted());
+        if (request.getIsBoosted() != null) post.setIsBoosted(request.getIsBoosted());
 
         return postMapper.toResponse(postRepository.save(post));
+    }
+
+    @Override
+    public PostResponse updateStatusPost(String id, PostRequest request) {
+        // 1. Tìm bài đăng
+        Post post = findPostById(id);
+
+        // 2. Kiểm tra status truyền lên có hợp lệ không
+        if (request.getStatus() == null) {
+            throw new RuntimeException("Trạng thái (status) không được để trống");
+        }
+
+        // 3. Cập nhật trạng thái mới
+        post.setStatus(request.getStatus());
+
+        // 4. Lưu vào database
+        Post updatedPost = postRepository.save(post);
+
+        // 5. Trả về kết quả qua Mapper
+        return postMapper.toResponse(updatedPost);
     }
 
     @Override

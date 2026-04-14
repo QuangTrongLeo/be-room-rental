@@ -8,7 +8,8 @@ public class PostRequest {
     private String roomId;
     private String title;
     private String content;
-    private double price;
+    private Double price;
+    // PENDING, ACTIVE, REJECTED, EXPIRED, HIDDEN
     private PostStatus status;
-    private boolean isBoosted;
+    private Boolean isBoosted;
 }

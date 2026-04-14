@@ -106,6 +106,16 @@ public class PostController {
                 .build();
     }
 
+    @PutMapping("/{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<PostResponse> updateStatusPost(@PathVariable String id, @RequestBody PostRequest request) {
+        return ApiResponse.<PostResponse>builder()
+                .code(200)
+                .message("Cập nhật trạng thái bài đăng thành công.")
+                .data(postService.updateStatusPost(id, request))
+                .build();
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'LANDLORD')")
     public ApiResponse<Void> deletePost(@PathVariable String id) {

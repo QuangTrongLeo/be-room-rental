@@ -143,7 +143,7 @@ public class RoomService implements IRoomService {
         return room;
     }
 
-    private Room findRoomById(String id) {
+    public Room findRoomById(String id) {
         return roomRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Phòng không tồn tại với ID: " + id));
     }

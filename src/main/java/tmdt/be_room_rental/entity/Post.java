@@ -24,10 +24,18 @@ public class Post {
     private String landlordId;
     private String title;
     private String content;
-    private double price;
+    private Double price;
+
+    @Builder.Default
     private PostStatus status = PostStatus.PENDING;
-    private boolean isBoosted = false;
+
+    @Builder.Default
+    private Boolean isBoosted = false;
+
+    @Builder.Default
     private int views = 0;
+
+    @Builder.Default
     private int favorites = 0;
     private LocalDateTime createdAt;
 }

@@ -18,7 +18,7 @@ public class PostMapper {
                 .content(post.getContent())
                 .price(post.getPrice())
                 .status(post.getStatus())
-                .isBoosted(post.isBoosted())
+                .isBoosted(post.getIsBoosted())
                 .views(post.getViews())
                 .favorites(post.getFavorites())
                 .createdAt(post.getCreatedAt())

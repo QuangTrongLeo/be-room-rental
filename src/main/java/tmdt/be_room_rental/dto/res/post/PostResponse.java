@@ -14,9 +14,9 @@ public class PostResponse {
     private String landlordId;
     private String title;
     private String content;
-    private double price;
+    private Double price;
     private PostStatus status;
-    private boolean isBoosted;
+    private Boolean isBoosted;
     private int views;
     private int favorites;
     private LocalDateTime createdAt;
