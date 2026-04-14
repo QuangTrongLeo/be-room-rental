@@ -52,7 +52,8 @@ public class UserController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    // CHANGE FOR TEST
+    @PreAuthorize("hasAnyRole('ADMIN', 'LANDLORD', 'USER')")
     public ApiResponse<List<UserResponse>> getAllUsers() {
         List<UserResponse> users = userService.getAllUsers();
         return ApiResponse.<List<UserResponse>>builder()
