@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import tmdt.be_room_rental.enums.TransactionStatus;
+import tmdt.be_room_rental.enums.status.TransactionStatus;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

@@ -2,7 +2,7 @@ package tmdt.be_room_rental.dto.res.post;
 
 import lombok.Builder;
 import lombok.Data;
-import tmdt.be_room_rental.enums.PostStatus;
+import tmdt.be_room_rental.enums.status.PostStatus;
 
 import java.time.LocalDateTime;
 

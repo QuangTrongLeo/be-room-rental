@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 import tmdt.be_room_rental.dto.res.room.RoomResponse;
 import tmdt.be_room_rental.dto.res.room.RoomTypeResponse;
 import tmdt.be_room_rental.entity.Room;
-import tmdt.be_room_rental.enums.RoomType;
+import tmdt.be_room_rental.enums.type.RoomType;
 
 import java.util.Arrays;
 import java.util.Collections;

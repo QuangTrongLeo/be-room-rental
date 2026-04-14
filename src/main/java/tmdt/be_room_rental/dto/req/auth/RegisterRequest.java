@@ -1,7 +1,7 @@
 package tmdt.be_room_rental.dto.req.auth;
 
 import lombok.Data;
-import tmdt.be_room_rental.enums.ProviderType;
+import tmdt.be_room_rental.enums.type.ProviderType;
 import tmdt.be_room_rental.enums.RoleEnum;
 
 @Data

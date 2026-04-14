@@ -5,7 +5,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.data.mongodb.core.index.GeoSpatialIndexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-import tmdt.be_room_rental.enums.RoomType;
+import tmdt.be_room_rental.enums.type.RoomType;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,7 +18,7 @@ public class Room {
     private String id = UUID.randomUUID().toString();
     private String landlordId;
     private String address;
-    private double area;
+    private Double area;
     private List<String> amenities;
     private List<String> images;
     private RoomType roomType;

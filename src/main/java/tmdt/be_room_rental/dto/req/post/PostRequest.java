@@ -1,7 +1,7 @@
 package tmdt.be_room_rental.dto.req.post;
 
 import lombok.Data;
-import tmdt.be_room_rental.enums.PostStatus;
+import tmdt.be_room_rental.enums.status.PostStatus;
 
 @Data
 public class PostRequest {

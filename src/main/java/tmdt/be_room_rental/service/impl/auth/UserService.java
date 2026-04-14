@@ -7,7 +7,7 @@ import tmdt.be_room_rental.dto.req.auth.ProfileRequest;
 import tmdt.be_room_rental.dto.req.auth.RegisterRequest;
 import tmdt.be_room_rental.dto.res.auth.UserResponse;
 import tmdt.be_room_rental.entity.User;
-import tmdt.be_room_rental.enums.ProviderType;
+import tmdt.be_room_rental.enums.type.ProviderType;
 import tmdt.be_room_rental.enums.RoleEnum;
 import tmdt.be_room_rental.mapper.auth.UserMapper;
 import tmdt.be_room_rental.repository.auth.UserRepository;

@@ -3,7 +3,7 @@ package tmdt.be_room_rental.repository.post;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 import tmdt.be_room_rental.entity.Post;
-import tmdt.be_room_rental.enums.PostStatus;
+import tmdt.be_room_rental.enums.status.PostStatus;
 
 import java.util.List;
 

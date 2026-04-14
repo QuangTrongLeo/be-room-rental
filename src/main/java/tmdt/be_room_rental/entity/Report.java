@@ -6,8 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import tmdt.be_room_rental.enums.ReportStatus;
-import tmdt.be_room_rental.enums.ReportType;
+import tmdt.be_room_rental.enums.status.ReportStatus;
+import tmdt.be_room_rental.enums.type.ReportType;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

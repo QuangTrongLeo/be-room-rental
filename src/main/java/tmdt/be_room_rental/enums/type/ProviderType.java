@@ -1,4 +1,4 @@
-package tmdt.be_room_rental.enums;
+package tmdt.be_room_rental.enums.type;
 
 public enum ProviderType {
     EMAIL, GOOGLE
