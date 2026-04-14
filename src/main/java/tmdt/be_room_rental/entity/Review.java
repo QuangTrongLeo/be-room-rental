@@ -16,7 +16,7 @@ public class Review {
     @Id @Builder.Default
     private String id = UUID.randomUUID().toString();
     private String userId;
-    private String postId; // Đánh giá dựa trên trải nghiệm tin đăng/phòng đó
+    private String landlordId;
     private int rating;
     private String comment;
     private LocalDateTime createdAt;

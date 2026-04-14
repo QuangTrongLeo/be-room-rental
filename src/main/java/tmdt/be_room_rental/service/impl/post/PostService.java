@@ -10,7 +10,6 @@ import tmdt.be_room_rental.entity.User;
 import tmdt.be_room_rental.enums.PostStatus;
 import tmdt.be_room_rental.mapper.post.PostMapper;
 import tmdt.be_room_rental.repository.post.PostRepository;
-import tmdt.be_room_rental.repository.room.RoomRepository;
 import tmdt.be_room_rental.service.impl.auth.SecurityService;
 import tmdt.be_room_rental.service.impl.room.RoomService;
 import tmdt.be_room_rental.service.interfaces.post.IPostService;
