@@ -1,4 +1,4 @@
-package tmdt.be_room_rental.dto.res.room;
+package tmdt.be_room_rental.dto.res.post;
 
 import lombok.Builder;
 import lombok.Data;

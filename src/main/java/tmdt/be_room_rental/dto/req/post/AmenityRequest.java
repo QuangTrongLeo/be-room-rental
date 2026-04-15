@@ -1,4 +1,4 @@
-package tmdt.be_room_rental.dto.req.room;
+package tmdt.be_room_rental.dto.req.post;
 
 import lombok.Data;
 

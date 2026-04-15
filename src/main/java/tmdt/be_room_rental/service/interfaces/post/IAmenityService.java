@@ -1,7 +1,7 @@
-package tmdt.be_room_rental.service.interfaces.room;
+package tmdt.be_room_rental.service.interfaces.post;
 
-import tmdt.be_room_rental.dto.req.room.AmenityRequest;
-import tmdt.be_room_rental.dto.res.room.AmenityResponse;
+import tmdt.be_room_rental.dto.req.post.AmenityRequest;
+import tmdt.be_room_rental.dto.res.post.AmenityResponse;
 
 import java.util.List;
 

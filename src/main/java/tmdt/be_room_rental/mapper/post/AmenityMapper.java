@@ -1,7 +1,7 @@
-package tmdt.be_room_rental.mapper.room;
+package tmdt.be_room_rental.mapper.post;
 
 import org.springframework.stereotype.Component;
-import tmdt.be_room_rental.dto.res.room.AmenityResponse;
+import tmdt.be_room_rental.dto.res.post.AmenityResponse;
 import tmdt.be_room_rental.entity.Amenity;
 
 import java.util.List;

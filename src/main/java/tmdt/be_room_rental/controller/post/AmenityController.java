@@ -1,13 +1,12 @@
-package tmdt.be_room_rental.controller.room;
+package tmdt.be_room_rental.controller.post;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import tmdt.be_room_rental.dto.req.room.AmenityRequest;
+import tmdt.be_room_rental.dto.req.post.AmenityRequest;
 import tmdt.be_room_rental.dto.res.ApiResponse;
-import tmdt.be_room_rental.dto.res.room.AmenityResponse;
-import tmdt.be_room_rental.service.interfaces.room.IAmenityService;
+import tmdt.be_room_rental.dto.res.post.AmenityResponse;
+import tmdt.be_room_rental.service.interfaces.post.IAmenityService;
 
 import java.util.List;
 

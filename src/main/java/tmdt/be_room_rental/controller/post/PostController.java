@@ -20,7 +20,7 @@ public class PostController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'LANDLORD')")
-    public ApiResponse<PostResponse> createPost(@RequestBody @Valid PostRequest request) {
+    public ApiResponse<PostResponse> createPost(@ModelAttribute @Valid PostRequest request) {
         return ApiResponse.<PostResponse>builder()
                 .code(200)
                 .message("Tạo bài đăng thành công.")
@@ -98,7 +98,7 @@ public class PostController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'LANDLORD')")
-    public ApiResponse<PostResponse> updatePost(@PathVariable String id, @RequestBody @Valid PostRequest request) {
+    public ApiResponse<PostResponse> updatePost(@PathVariable String id, @ModelAttribute @Valid PostRequest request) {
         return ApiResponse.<PostResponse>builder()
                 .code(200)
                 .message("Cập nhật bài đăng thành công.")

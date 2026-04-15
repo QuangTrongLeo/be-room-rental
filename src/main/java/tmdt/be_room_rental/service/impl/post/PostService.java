@@ -1,53 +1,66 @@
 package tmdt.be_room_rental.service.impl.post;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.stereotype.Service;
 import tmdt.be_room_rental.dto.req.post.PostRequest;
 import tmdt.be_room_rental.dto.res.post.PostResponse;
 import tmdt.be_room_rental.entity.Post;
-import tmdt.be_room_rental.entity.Room;
 import tmdt.be_room_rental.entity.User;
 import tmdt.be_room_rental.enums.status.PostStatus;
 import tmdt.be_room_rental.mapper.post.PostMapper;
 import tmdt.be_room_rental.repository.post.PostRepository;
 import tmdt.be_room_rental.service.impl.auth.SecurityService;
-import tmdt.be_room_rental.service.impl.room.RoomService;
+import tmdt.be_room_rental.service.interfaces.auth.ICloudinaryService;
 import tmdt.be_room_rental.service.interfaces.post.IPostService;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class PostService implements IPostService {
     private final PostRepository postRepository;
-    private final RoomService roomService;
-    private final SecurityService securityService;
     private final PostMapper postMapper;
+    private final SecurityService securityService;
+    private final ICloudinaryService cloudinaryService;
+
+    private static final int MAX_IMAGES = 8;
 
     @Override
     public PostResponse createPost(PostRequest request) {
         User currentUser = securityService.getCurrentUser();
 
-        // 1. Kiểm tra phòng có tồn tại không
-        Room room = roomService.findRoomById(request.getRoomId());
-
-        // 2. Kiểm tra phòng có thuộc về chủ trọ đang đăng nhập không
-        if (!room.getLandlordId().equals(currentUser.getId())) {
-            throw new RuntimeException("Bạn không có quyền đăng bài cho phòng này");
+        // Kiểm tra ảnh
+        if (request.getImages() != null && request.getImages().size() > MAX_IMAGES) {
+            throw new RuntimeException("Chỉ được upload tối đa " + MAX_IMAGES + " ảnh");
         }
 
-        // 3. Khởi tạo Post
         Post post = Post.builder()
-                .roomId(request.getRoomId())
                 .landlordId(currentUser.getId())
                 .title(request.getTitle())
                 .content(request.getContent())
                 .price(request.getPrice())
-                .status(request.getStatus() != null ? request.getStatus() : PostStatus.PENDING)
+                .status(PostStatus.PENDING)
                 .isBoosted(request.getIsBoosted() != null ? request.getIsBoosted() : false)
+                .address(request.getAddress())
+                .area(request.getArea())
+                .amenities(request.getAmenities())
+                .roomType(request.getRoomType())
                 .createdAt(LocalDateTime.now())
                 .build();
+
+        if (request.getLongitude() != null && request.getLatitude() != null) {
+            post.setLocation(new GeoJsonPoint(request.getLongitude(), request.getLatitude()));
+        }
+
+        if (request.getImages() != null && !request.getImages().isEmpty()) {
+            List<String> urls = request.getImages().stream()
+                    .map(file -> cloudinaryService.upload(file, "posts"))
+                    .collect(Collectors.toList());
+            post.setImages(urls);
+        }
 
         return postMapper.toResponse(postRepository.save(post));
     }
@@ -57,103 +70,95 @@ public class PostService implements IPostService {
         Post post = findPostById(id);
         User currentUser = securityService.getCurrentUser();
 
-        // Kiểm tra quyền sở hữu bài đăng
         if (!post.getLandlordId().equals(currentUser.getId())) {
             throw new RuntimeException("Bạn không có quyền chỉnh sửa bài đăng này");
         }
 
-        // Cập nhật các trường thông tin
+        // Update Post info
         if (request.getTitle() != null) post.setTitle(request.getTitle());
         if (request.getContent() != null) post.setContent(request.getContent());
         if (request.getPrice() != null) post.setPrice(request.getPrice());
-        if (request.getStatus() != null) post.setStatus(request.getStatus());
-        if (request.getIsBoosted() != null) post.setIsBoosted(request.getIsBoosted());
+
+        // Update Room info (Flattened)
+        if (request.getAddress() != null) post.setAddress(request.getAddress());
+        if (request.getArea() != null && request.getArea() > 0) post.setArea(request.getArea());
+        if (request.getAmenities() != null) post.setAmenities(request.getAmenities());
+        if (request.getRoomType() != null) post.setRoomType(request.getRoomType());
+
+        if (request.getLongitude() != null && request.getLatitude() != null) {
+            post.setLocation(new GeoJsonPoint(request.getLongitude(), request.getLatitude()));
+        }
+
+        // Logic xử lý ảnh
+        if (request.getImages() != null && !request.getImages().isEmpty()) {
+            if (request.getImages().size() > MAX_IMAGES) throw new RuntimeException("Quá số lượng ảnh");
+            if (post.getImages() != null) post.getImages().forEach(cloudinaryService::deleteByUrl);
+
+            List<String> newUrls = request.getImages().stream()
+                    .map(file -> cloudinaryService.upload(file, "posts"))
+                    .collect(Collectors.toList());
+            post.setImages(newUrls);
+        }
 
         return postMapper.toResponse(postRepository.save(post));
     }
 
     @Override
     public PostResponse updateStatusPost(String id, PostRequest request) {
-        // 1. Tìm bài đăng
         Post post = findPostById(id);
-
-        // 2. Kiểm tra status truyền lên có hợp lệ không
-        if (request.getStatus() == null) {
-            throw new RuntimeException("Trạng thái (status) không được để trống");
-        }
-
-        // 3. Cập nhật trạng thái mới
+        if (request.getStatus() == null) throw new RuntimeException("Status trống");
         post.setStatus(request.getStatus());
-
-        // 4. Lưu vào database
-        Post updatedPost = postRepository.save(post);
-
-        // 5. Trả về kết quả qua Mapper
-        return postMapper.toResponse(updatedPost);
+        return postMapper.toResponse(postRepository.save(post));
     }
 
     @Override
     public PostResponse getPostById(String id) {
         Post post = findPostById(id);
-
-        // Tăng view mỗi khi có người xem chi tiết
         post.setViews(post.getViews() + 1);
-        postRepository.save(post);
-
-        return postMapper.toResponse(post);
+        return postMapper.toResponse(postRepository.save(post));
     }
 
     @Override
     public List<PostResponse> getMyPosts() {
-        User currentUser = securityService.getCurrentUser();
-        List<Post> posts = postRepository.findAllByLandlordIdOrderByCreatedAtDesc(currentUser.getId());
-        return postMapper.toResponseList(posts);
+        return postMapper.toResponseList(postRepository.findAllByLandlordIdOrderByCreatedAtDesc(securityService.getCurrentUser().getId()));
     }
 
     @Override
     public List<PostResponse> getPosts() {
-        List<Post> posts = postRepository.findAllByOrderByCreatedAtDesc();
-        return postMapper.toResponseList(posts);
-    }
-
-    @Override
-    public List<PostResponse> getPendingPosts() {
-        List<Post> posts = postRepository.findAllByStatusOrderByCreatedAtDesc(PostStatus.PENDING);
-        return postMapper.toResponseList(posts);
+        return postMapper.toResponseList(postRepository.findAllByOrderByCreatedAtDesc());
     }
 
     @Override
     public List<PostResponse> getActivePosts() {
-        List<Post> posts = postRepository.findAllByStatusOrderByCreatedAtDesc(PostStatus.ACTIVE);
-        return postMapper.toResponseList(posts);
+        return postMapper.toResponseList(postRepository.findAllByStatusOrderByCreatedAtDesc(PostStatus.ACTIVE));
+    }
+
+    @Override
+    public List<PostResponse> getPendingPosts() {
+        return postMapper.toResponseList(postRepository.findAllByStatusOrderByCreatedAtDesc(PostStatus.PENDING));
     }
 
     @Override
     public List<PostResponse> getHiddenPosts() {
-        List<Post> posts = postRepository.findAllByStatusOrderByCreatedAtDesc(PostStatus.HIDDEN);
-        return postMapper.toResponseList(posts);
+        return postMapper.toResponseList(postRepository.findAllByStatusOrderByCreatedAtDesc(PostStatus.HIDDEN));
     }
 
     @Override
     public List<PostResponse> getRejectPosts() {
-        List<Post> posts = postRepository.findAllByStatusOrderByCreatedAtDesc(PostStatus.REJECTED);
-        return postMapper.toResponseList(posts);
+        return postMapper.toResponseList(postRepository.findAllByStatusOrderByCreatedAtDesc(PostStatus.REJECTED));
     }
 
     @Override
     public void deletePost(String id) {
         Post post = findPostById(id);
-        User currentUser = securityService.getCurrentUser();
-
-        if (!post.getLandlordId().equals(currentUser.getId())) {
-            throw new RuntimeException("Bạn không có quyền xóa bài đăng này");
+        if (!post.getLandlordId().equals(securityService.getCurrentUser().getId())) {
+            throw new RuntimeException("Không có quyền");
         }
-
+        if (post.getImages() != null) post.getImages().forEach(cloudinaryService::deleteByUrl);
         postRepository.delete(post);
     }
 
-    public Post findPostById(String id) {
-        return postRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Bài đăng không tồn tại với ID: " + id));
+    private Post findPostById(String id) {
+        return postRepository.findById(id).orElseThrow(() -> new RuntimeException("Không tìm thấy Post"));
     }
 }

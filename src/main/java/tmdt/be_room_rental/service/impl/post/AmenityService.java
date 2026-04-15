@@ -1,13 +1,13 @@
-package tmdt.be_room_rental.service.impl.room;
+package tmdt.be_room_rental.service.impl.post;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import tmdt.be_room_rental.dto.req.room.AmenityRequest;
-import tmdt.be_room_rental.dto.res.room.AmenityResponse;
+import tmdt.be_room_rental.dto.req.post.AmenityRequest;
+import tmdt.be_room_rental.dto.res.post.AmenityResponse;
 import tmdt.be_room_rental.entity.Amenity;
-import tmdt.be_room_rental.mapper.room.AmenityMapper;
-import tmdt.be_room_rental.repository.room.AmenityRepository;
-import tmdt.be_room_rental.service.interfaces.room.IAmenityService;
+import tmdt.be_room_rental.mapper.post.AmenityMapper;
+import tmdt.be_room_rental.repository.post.AmenityRepository;
+import tmdt.be_room_rental.service.interfaces.post.IAmenityService;
 
 import java.time.LocalDateTime;
 import java.util.List;

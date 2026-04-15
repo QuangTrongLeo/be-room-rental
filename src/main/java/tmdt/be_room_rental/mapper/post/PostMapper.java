@@ -12,7 +12,6 @@ public class PostMapper {
         if (post == null) return null;
         return PostResponse.builder()
                 .id(post.getId())
-                .roomId(post.getRoomId())
                 .landlordId(post.getLandlordId())
                 .title(post.getTitle())
                 .content(post.getContent())
@@ -22,6 +21,13 @@ public class PostMapper {
                 .views(post.getViews())
                 .favorites(post.getFavorites())
                 .createdAt(post.getCreatedAt())
+                .address(post.getAddress())
+                .area(post.getArea())
+                .amenities(post.getAmenities())
+                .images(post.getImages())
+                .roomType(post.getRoomType())
+                .longitude(post.getLocation() != null ? post.getLocation().getX() : null)
+                .latitude(post.getLocation() != null ? post.getLocation().getY() : null)
                 .build();
     }
 

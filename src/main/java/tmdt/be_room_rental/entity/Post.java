@@ -1,14 +1,16 @@
 package tmdt.be_room_rental.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
+import org.springframework.data.mongodb.core.index.GeoSpatialIndexed;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import tmdt.be_room_rental.enums.status.PostStatus;
+import tmdt.be_room_rental.enums.type.RoomType;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Document(collection = "posts")
@@ -20,11 +22,11 @@ public class Post {
     @Id
     @Builder.Default
     private String id = UUID.randomUUID().toString();
-    private String roomId;
+
+    @Indexed
     private String landlordId;
     private String title;
     private String content;
-    private Double price;
 
     @Builder.Default
     private PostStatus status = PostStatus.PENDING;
@@ -33,9 +35,23 @@ public class Post {
     private Boolean isBoosted = false;
 
     @Builder.Default
-    private int views = 0;
-
+    private Integer views = 0;
     @Builder.Default
-    private int favorites = 0;
+    private Integer favorites = 0;
+
+    // --- Thông tin đặc trưng của phòng ---
+    private Double price;
+    private Double area;
+    private String address;
+    private List<String> amenities;
+    private List<String> images;
+    private RoomType roomType;
+
+    @GeoSpatialIndexed
+    private GeoJsonPoint location;
+
+    // --- Thời gian ---
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private LocalDateTime expiredAt;
 }
