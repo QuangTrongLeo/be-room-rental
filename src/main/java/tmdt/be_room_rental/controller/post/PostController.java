@@ -6,7 +6,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import tmdt.be_room_rental.dto.req.post.PostRequest;
 import tmdt.be_room_rental.dto.res.ApiResponse;
+import tmdt.be_room_rental.dto.res.post.PostHistoryResponse;
 import tmdt.be_room_rental.dto.res.post.PostResponse;
+import tmdt.be_room_rental.service.interfaces.post.IPostHistoryService;
 import tmdt.be_room_rental.service.interfaces.post.IPostService;
 
 import java.util.List;
@@ -17,6 +19,7 @@ import java.util.List;
 public class PostController {
 
     private final IPostService postService;
+    private final IPostHistoryService postHistoryService;
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'LANDLORD')")
@@ -123,6 +126,16 @@ public class PostController {
         return ApiResponse.<Void>builder()
                 .code(200)
                 .message("Xóa bài đăng thành công.")
+                .build();
+    }
+
+    @GetMapping("/my-history")
+    @PreAuthorize("isAuthenticated()")
+    public ApiResponse<List<PostHistoryResponse>> getMyPostHistory() {
+        return ApiResponse.<List<PostHistoryResponse>>builder()
+                .code(200)
+                .message("Lấy danh sách lịch sử xem bài đăng thành công.")
+                .data(postHistoryService.getMyPostHistory())
                 .build();
     }
 }

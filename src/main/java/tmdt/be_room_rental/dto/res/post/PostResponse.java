@@ -26,6 +26,6 @@ public class PostResponse {
     private RoomType roomType;
     private Boolean isBoosted;
     private List<String> images;
-    private List<String> amenities;
+    private List<AmenityResponse> amenities;
     private LocalDateTime createdAt;
 }

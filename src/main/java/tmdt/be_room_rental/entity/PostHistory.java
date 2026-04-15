@@ -5,21 +5,26 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Document(collection = "room_history") // Lịch sử xem phòng
+@Document(collection = "post_history") // Lịch sử xem bài đăng
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RoomHistory {
+public class PostHistory {
     @Id
     @Builder.Default
     private String id = UUID.randomUUID().toString();
+
+    @Indexed
     private String userId;
-    private String postId; // Lưu PostId để biết lúc đó họ xem tin nào
+    @Indexed
+    private String postId;
+
     private LocalDateTime viewedAt;
 }

@@ -12,6 +12,7 @@ import tmdt.be_room_rental.mapper.post.PostMapper;
 import tmdt.be_room_rental.repository.post.PostRepository;
 import tmdt.be_room_rental.service.impl.auth.SecurityService;
 import tmdt.be_room_rental.service.interfaces.auth.ICloudinaryService;
+import tmdt.be_room_rental.service.interfaces.post.IPostHistoryService;
 import tmdt.be_room_rental.service.interfaces.post.IPostService;
 
 import java.time.LocalDateTime;
@@ -22,9 +23,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PostService implements IPostService {
     private final PostRepository postRepository;
-    private final PostMapper postMapper;
-    private final SecurityService securityService;
+    private final IPostHistoryService postHistoryService;
     private final ICloudinaryService cloudinaryService;
+    private final SecurityService securityService;
+    private final PostMapper postMapper;
 
     private static final int MAX_IMAGES = 8;
 
@@ -115,6 +117,15 @@ public class PostService implements IPostService {
     public PostResponse getPostById(String id) {
         Post post = findPostById(id);
         post.setViews(post.getViews() + 1);
+
+        try {
+            String currentUserId = securityService.getCurrentUser().getId();
+            if (currentUserId != null) {
+                postHistoryService.saveHistory(currentUserId, id);
+            }
+        } catch (Exception e) {
+            // User chưa đăng nhập thì bỏ qua không lưu lịch sử
+        }
         return postMapper.toResponse(postRepository.save(post));
     }
 
@@ -158,7 +169,7 @@ public class PostService implements IPostService {
         postRepository.delete(post);
     }
 
-    private Post findPostById(String id) {
+    public Post findPostById(String id) {
         return postRepository.findById(id).orElseThrow(() -> new RuntimeException("Không tìm thấy Post"));
     }
 }
