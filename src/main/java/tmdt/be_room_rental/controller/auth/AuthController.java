@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import tmdt.be_room_rental.dto.req.auth.*;
 import tmdt.be_room_rental.dto.res.ApiResponse;
 import tmdt.be_room_rental.dto.res.auth.TokenResponse;
+import tmdt.be_room_rental.service.impl.auth.GoogleAuthService;
 import tmdt.be_room_rental.service.interfaces.auth.IAuthService;
 
 @RestController
@@ -14,6 +15,7 @@ import tmdt.be_room_rental.service.interfaces.auth.IAuthService;
 public class AuthController {
 
     private final IAuthService authService;
+    private final GoogleAuthService googleAuthService;
 
     @PostMapping("/register")
     public ApiResponse<String> register(@RequestBody RegisterRequest request) {
@@ -59,6 +61,16 @@ public class AuthController {
         return ApiResponse.<TokenResponse>builder()
                 .code(HttpStatus.OK.value())
                 .message("Đăng nhập thành công.")
+                .data(tokenResponse)
+                .build();
+    }
+
+    @PostMapping("/google")
+    public ApiResponse<TokenResponse> loginWithGoogle(@RequestBody GoogleLoginRequest request) {
+        TokenResponse tokenResponse = googleAuthService.loginWithGoogle(request);
+        return ApiResponse.<TokenResponse>builder()
+                .code(HttpStatus.OK.value())
+                .message("Đăng nhập bằng Google thành công.")
                 .data(tokenResponse)
                 .build();
     }

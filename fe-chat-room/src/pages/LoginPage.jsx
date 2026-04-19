@@ -1,17 +1,67 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { login } from '../services/api'
+import { login, loginWithGoogle } from '../services/api'
 import { useAuth } from '../context/AuthContext'
 import styles from './LoginPage.module.css'
+
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
 
 export default function LoginPage() {
   const { saveLogin } = useAuth()
   const navigate = useNavigate()
+  const googleBtnRef = useRef(null)
 
   const [form, setForm] = useState({ email: '', password: '' })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  // ── Google Sign-In callback ──
+  async function handleGoogleCallback(response) {
+    setError('')
+    setLoading(true)
+    try {
+      const { accessToken, refreshToken } = await loginWithGoogle(response.credential)
+      saveLogin(accessToken, refreshToken)
+      navigate('/chat')
+    } catch (err) {
+      setError(err.message || 'Đăng nhập Google thất bại')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // ── Khởi tạo Google Identity Services ──
+  useEffect(() => {
+    function initGoogle() {
+      if (!window.google?.accounts?.id) return false
+
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGoogleCallback,
+      })
+
+      window.google.accounts.id.renderButton(googleBtnRef.current, {
+        theme: 'filled_black',
+        size: 'large',
+        width: '100%',
+        text: 'signin_with',
+        shape: 'rectangular',
+        logo_alignment: 'left',
+      })
+
+      return true
+    }
+
+    // Google script có thể chưa load xong → retry
+    if (!initGoogle()) {
+      const interval = setInterval(() => {
+        if (initGoogle()) clearInterval(interval)
+      }, 200)
+      return () => clearInterval(interval)
+    }
+  }, [])
+
+  // ── Email/Password login ──
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
@@ -86,6 +136,18 @@ export default function LoginPage() {
             {loading ? <span className="spinner" /> : 'Đăng nhập'}
           </button>
         </form>
+
+        {/* ── Divider ── */}
+        <div className={styles.divider}>
+          <span className={styles.dividerLine} />
+          <span className={styles.dividerText}>hoặc</span>
+          <span className={styles.dividerLine} />
+        </div>
+
+        {/* ── Google Sign-In Button ── */}
+        <div className={styles.googleBtnWrapper}>
+          <div ref={googleBtnRef} id="google-signin-btn" />
+        </div>
 
         <p className={styles.hint}>
           Đăng nhập với tài khoản <strong>USER</strong> hoặc <strong>LANDLORD</strong>

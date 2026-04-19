@@ -48,6 +48,19 @@ export async function login(email, password) {
   return data.data // { accessToken, refreshToken }
 }
 
+/**
+ * POST /auth/google
+ * Body: { idToken }
+ * Returns: { accessToken, refreshToken }
+ */
+export async function loginWithGoogle(idToken) {
+  const data = await apiFetch('/auth/google', {
+    method: 'POST',
+    body: JSON.stringify({ idToken }),
+  })
+  return data.data // { accessToken, refreshToken }
+}
+
 // ──────────────────────────────────────────────
 // USER
 // ──────────────────────────────────────────────

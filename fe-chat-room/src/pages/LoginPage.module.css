@@ -167,3 +167,41 @@
 .hint strong {
   color: var(--text-secondary);
 }
+
+/* ── Divider ── */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 24px 0 20px;
+}
+
+.dividerLine {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.dividerText {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+/* ── Google Sign-In Button ── */
+.googleBtnWrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.googleBtnWrapper > div {
+  width: 100% !important;
+}
+
+.googleBtnWrapper iframe {
+  border-radius: var(--radius-sm) !important;
+}
+
