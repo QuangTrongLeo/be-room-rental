@@ -5,18 +5,14 @@ import org.springframework.stereotype.Service;
 import tmdt.be_room_rental.dto.req.finance.VoucherRequest;
 import tmdt.be_room_rental.dto.res.finance.VoucherResponse;
 import tmdt.be_room_rental.entity.Voucher;
-import tmdt.be_room_rental.entity.User;
-import tmdt.be_room_rental.enums.type.VoucherType;
 import tmdt.be_room_rental.mapper.finance.VoucherMapper;
 import tmdt.be_room_rental.repository.finance.VoucherRepository;
-import tmdt.be_room_rental.service.impl.auth.SecurityService;
 import tmdt.be_room_rental.service.interfaces.finance.IVoucherService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
