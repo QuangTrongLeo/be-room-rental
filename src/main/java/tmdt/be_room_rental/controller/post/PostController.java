@@ -41,6 +41,15 @@ public class PostController {
                 .build();
     }
 
+    @GetMapping("/amenity/{id}")
+    public ApiResponse<List<PostResponse>> getPostsByAmenity(@PathVariable String id) {
+        return ApiResponse.<List<PostResponse>>builder()
+                .code(200)
+                .message("Lấy danh sách bài đăng đang hiển thị thành công.")
+                .data(postService.getPostsByAmenityId(id))
+                .build();
+    }
+
     @GetMapping("/active")
     public ApiResponse<List<PostResponse>> getActivePosts() {
         return ApiResponse.<List<PostResponse>>builder()

@@ -9,6 +9,7 @@ import java.util.List;
 
 @Repository
 public interface PostRepository extends MongoRepository<Post, String> {
+    List<Post> findAllByAmenitiesContainingAndStatusOrderByCreatedAtDesc(String amenityId, PostStatus status);
     List<Post> findAllByLandlordIdOrderByCreatedAtDesc(String landlordId);
     List<Post> findAllByStatusOrderByCreatedAtDesc(PostStatus status);
     List<Post> findAllByOrderByCreatedAtDesc();

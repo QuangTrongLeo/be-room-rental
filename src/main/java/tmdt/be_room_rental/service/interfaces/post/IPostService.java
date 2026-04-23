@@ -11,6 +11,7 @@ public interface IPostService {
     PostResponse getPostById(String id);
     List<PostResponse> getMyPosts();
     List<PostResponse> getPosts();
+    List<PostResponse> getPostsByAmenityId(String amenityId);
     List<PostResponse> getPendingPosts();
     List<PostResponse> getActivePosts();
     List<PostResponse> getHiddenPosts();

@@ -140,6 +140,12 @@ public class PostService implements IPostService {
     }
 
     @Override
+    public List<PostResponse> getPostsByAmenityId(String amenityId) {
+        List<Post> posts = postRepository.findAllByAmenitiesContainingAndStatusOrderByCreatedAtDesc(amenityId, PostStatus.ACTIVE);
+        return postMapper.toResponseList(posts);
+    }
+
+    @Override
     public List<PostResponse> getActivePosts() {
         return postMapper.toResponseList(postRepository.findAllByStatusOrderByCreatedAtDesc(PostStatus.ACTIVE));
     }
