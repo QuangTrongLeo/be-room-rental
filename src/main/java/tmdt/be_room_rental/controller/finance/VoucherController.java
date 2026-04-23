@@ -55,7 +55,7 @@ public class VoucherController {
                 .build();
     }
 
-    @GetMapping
+    @GetMapping("/active")
     @PreAuthorize("hasAnyRole('ADMIN', 'LANDLORD')")
     public ApiResponse<List<VoucherResponse>> getActiveVouchers() {
         return ApiResponse.<List<VoucherResponse>>builder()
@@ -64,7 +64,7 @@ public class VoucherController {
                 .build();
     }
 
-    @PutMapping("/{id}")
+    @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'LANDLORD')")
     public ApiResponse<VoucherResponse> getVoucher(@PathVariable String id) {
         return ApiResponse.<VoucherResponse>builder()
