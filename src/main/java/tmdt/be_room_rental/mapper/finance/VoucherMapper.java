@@ -12,13 +12,12 @@ public class VoucherMapper {
         if (voucher == null) return null;
         return VoucherResponse.builder()
                 .id(voucher.getId())
-                .code(voucher.getCode())
                 .discountPercentage(voucher.getDiscountPercentage())
                 .maxDiscountAmount(voucher.getMaxDiscountAmount())
                 .quantity(voucher.getQuantity())
                 .usedCount(voucher.getUsedCount())
-                .type(voucher.getType())
                 .createdAt(voucher.getCreatedAt())
+                .startedAt(voucher.getStartedAt())
                 .expiredAt(voucher.getExpiredAt())
                 .isActive(voucher.getIsActive())
                 .build();

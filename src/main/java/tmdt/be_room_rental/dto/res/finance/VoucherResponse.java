@@ -10,13 +10,12 @@ import java.time.LocalDateTime;
 @Builder
 public class VoucherResponse {
     private String id;
-    private String code;
     private Double discountPercentage;
     private Double maxDiscountAmount;
     private Integer quantity;
     private Integer usedCount;
-    private VoucherType type;
     private LocalDateTime createdAt;
+    private LocalDateTime startedAt;
     private LocalDateTime expiredAt;
     private Boolean isActive;
 }

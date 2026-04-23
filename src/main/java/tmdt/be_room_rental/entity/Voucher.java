@@ -17,7 +17,6 @@ import java.util.UUID;
 public class Voucher {
     @Id @Builder.Default
     private String id = UUID.randomUUID().toString();
-    private String code;
 
     private Double discountPercentage;
     private Double maxDiscountAmount;
@@ -26,13 +25,13 @@ public class Voucher {
     @Builder.Default
     private Integer usedCount = 0;
 
-    private VoucherType type;
     private LocalDateTime createdAt;
+    private LocalDateTime startedAt;
     private LocalDateTime expiredAt;
 
     @Builder.Default
     private List<String> usedByUsers = new java.util.ArrayList<>();
 
     @Builder.Default
-    private Boolean isActive = true;
+    private Boolean isActive = false;
 }
