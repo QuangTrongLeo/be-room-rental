@@ -1,0 +1,135 @@
+/* =============================================
+   ROOM RENTAL CHAT — GLOBAL STYLES
+   ============================================= */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --primary: #6c63ff;
+  --primary-dark: #4f46e5;
+  --primary-light: #818cf8;
+  --accent: #06d6a0;
+  --accent-dark: #059669;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+
+  --bg-base: #0f0f1a;
+  --bg-card: #1a1a2e;
+  --bg-card2: #16213e;
+  --bg-glass: rgba(255,255,255,0.04);
+  --bg-hover: rgba(108,99,255,0.12);
+
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #475569;
+
+  --border: rgba(255,255,255,0.08);
+  --border-focus: rgba(108,99,255,0.6);
+
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-md: 0 8px 24px rgba(0,0,0,0.4);
+  --shadow-lg: 0 16px 48px rgba(0,0,0,0.5);
+  --shadow-glow: 0 0 24px rgba(108,99,255,0.3);
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+
+  --transition: all 0.2s ease;
+  --font: 'Inter', -apple-system, sans-serif;
+}
+
+html, body, #root {
+  height: 100%;
+  font-family: var(--font);
+  background: var(--bg-base);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary-light); }
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes messagePop {
+  from { opacity: 0; transform: scale(0.92) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.animate-fade { animation: fadeIn 0.3s ease forwards; }
+.animate-slide { animation: slideIn 0.3s ease forwards; }
+
+/* Spinner */
+.spinner {
+  width: 20px; height: 20px;
+  border: 2px solid rgba(255,255,255,0.2);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+/* Glass card */
+.glass {
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, var(--primary-light), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.badge-user {
+  background: rgba(6,214,160,0.15);
+  color: var(--accent);
+  border: 1px solid rgba(6,214,160,0.3);
+}
+.badge-landlord {
+  background: rgba(108,99,255,0.15);
+  color: var(--primary-light);
+  border: 1px solid rgba(108,99,255,0.3);
+}
+.badge-admin {
+  background: rgba(245,158,11,0.15);
+  color: var(--warning);
+  border: 1px solid rgba(245,158,11,0.3);
+}

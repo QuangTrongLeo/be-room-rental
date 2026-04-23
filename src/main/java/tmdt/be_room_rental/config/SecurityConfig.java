@@ -24,32 +24,18 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    @Value("${BE_URI_API}")
-    private String apiPrefix;
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        // 1. Chỉ khai báo các endpoint thuần túy
-        String[] endpoints = {
-                "/auth/**",
-                "/users/**",
-                "/public/**"
-        };
-
-        // 2. Tự động nối apiPrefix vào từng endpoint
-        String[] publicUrls = java.util.Arrays.stream(endpoints)
-                .map(path -> apiPrefix + path)
-                .toArray(String[]::new);
+        String[] publicEndpoints = { "/auth/**", "/public/**" };
 
         return http
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // 3. Sử dụng danh sách đã được xử lý tiền tố
-                        .requestMatchers(publicUrls).permitAll()
-                        .anyRequest().authenticated()
+                        .requestMatchers(publicEndpoints).permitAll()
+                        .anyRequest().permitAll()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> ex
