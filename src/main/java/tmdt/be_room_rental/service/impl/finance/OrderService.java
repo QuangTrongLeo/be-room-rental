@@ -1,6 +1,7 @@
 package tmdt.be_room_rental.service.impl.finance;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import tmdt.be_room_rental.config.VNPayConfig;
 import tmdt.be_room_rental.dto.req.finance.OrderRequest;
@@ -26,6 +27,8 @@ public class OrderService implements IOrderService {
     private final OrderEnumMapper orderEnumMapper;
     private final OrderMapper orderMapper;
     private final VNPayConfig vnPayConfig;
+    private final TaskScheduler taskScheduler;
+    private static final int ORDER_EXPIRY_MINUTES = 10;
 
     @Override
     public List<EnumResponse> getOrdersStatus() {
@@ -36,7 +39,14 @@ public class OrderService implements IOrderService {
     public OrderResponse createOrder(OrderRequest request) {
         User user = securityService.getCurrentUser();
         Order order = buildOrder(user, request);
-        return orderMapper.toResponse(orderRepository.save(order));
+        Order savedOrder = orderRepository.save(order);
+
+        // Lập lịch kiểm tra sau 10 phút
+        taskScheduler.schedule(() -> {
+            handleOrderTimeout(savedOrder.getId());
+        }, java.sql.Timestamp.valueOf(LocalDateTime.now().plusMinutes(ORDER_EXPIRY_MINUTES)).toInstant());
+
+        return orderMapper.toResponse(savedOrder);
     }
 
     @Override
@@ -92,6 +102,22 @@ public class OrderService implements IOrderService {
         orderRepository.delete(order);
     }
 
+    public void successOrder(String vnpTxnRef) {
+        Order order = findByVnpTxnRef(vnpTxnRef);
+        if (order.getStatus() == OrderStatus.PENDING) {
+            order.setStatus(OrderStatus.SUCCESS);
+            orderRepository.save(order);
+        }
+    }
+
+    public void failOrder(String vnpTxnRef) {
+        Order order = findByVnpTxnRef(vnpTxnRef);
+        if (order.getStatus() == OrderStatus.PENDING) {
+            order.setStatus(OrderStatus.FAILED);
+            orderRepository.save(order);
+        }
+    }
+
     public Order findOrderById(String id){
         return orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Đơn hàng không tồn tại với ID: " + id));
@@ -108,5 +134,25 @@ public class OrderService implements IOrderService {
                 .status(OrderStatus.PENDING)
                 .createdAt(LocalDateTime.now())
                 .build();
+    }
+
+    private Order findByVnpTxnRef(String vnpTxnRef) {
+        return orderRepository.findByVnpTxnRef(vnpTxnRef)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với mã giao dịch: " + vnpTxnRef));
+    }
+
+    private void handleOrderTimeout(String orderId) {
+        try {
+            Order order = orderRepository.findById(orderId).orElse(null);
+
+            // Nếu sau 10 phút đơn hàng vẫn là PENDING
+            if (order != null && order.getStatus() == OrderStatus.PENDING) {
+                order.setStatus(OrderStatus.FAILED);
+                orderRepository.save(order);
+                System.out.println("LOG: Đơn hàng " + orderId + " đã tự động chuyển thành FAILED do quá hạn 10 phút.");
+            }
+        } catch (Exception e) {
+            System.err.println("LOG: Lỗi khi xử lý timeout đơn hàng: " + e.getMessage());
+        }
     }
 }
