@@ -10,5 +10,6 @@ public interface IUserService {
     UserResponse getMyProfile();
     UserResponse getUserById(String id);
     UserResponse updateMyProfile(ProfileRequest request);
-    List<UserResponse> getAllUsers();
+    List<UserResponse> getUsers();
+    void deleteUser(String id);
 }

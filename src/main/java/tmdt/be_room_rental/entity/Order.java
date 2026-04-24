@@ -6,23 +6,31 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import tmdt.be_room_rental.enums.status.OrderStatus;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Document(collection = "boosts")
+@Document(collection = "orders")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Boost {
+public class Order {
+
     @Id
     @Builder.Default
     private String id = UUID.randomUUID().toString();
-    private String postId;
-    private String landlordId;
-    private double price; // Giá tiền của 1 lần đẩy tin này
-    private LocalDateTime startTime;
-    private LocalDateTime endTime; // Hết thời gian này bài sẽ không còn nổi bật nữa
-    private boolean active;
+    private String userId;
+    private String packageId;
+    private String voucherId;
+
+    private Double totalPrice;
+
+    @Builder.Default
+    private OrderStatus status = OrderStatus.PENDING;
+    private String vnpTxnRef;
+
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

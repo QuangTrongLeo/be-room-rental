@@ -54,8 +54,8 @@ public class UserController {
     @GetMapping
     // CHANGE FOR TEST
     @PreAuthorize("hasAnyRole('ADMIN', 'LANDLORD', 'USER')")
-    public ApiResponse<List<UserResponse>> getAllUsers() {
-        List<UserResponse> users = userService.getAllUsers();
+    public ApiResponse<List<UserResponse>> getUsers() {
+        List<UserResponse> users = userService.getUsers();
         return ApiResponse.<List<UserResponse>>builder()
                 .code(HttpStatus.OK.value())
                 .message("Lấy danh sách người dùng thành công.")
