@@ -25,11 +25,10 @@ public class UserService implements IUserService {
     private final CloudinaryService cloudinaryService;
     private final UserMapper userMapper;
 
+    @Override
     public User createUser(RegisterRequest request) {
         RoleEnum role = determineRole(request.getRole());
-
         ProviderType provider = determineProvider(request.getProvider());
-
         User user = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())

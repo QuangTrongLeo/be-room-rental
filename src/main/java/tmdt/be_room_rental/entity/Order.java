@@ -17,20 +17,16 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Order {
-
     @Id
     @Builder.Default
     private String id = UUID.randomUUID().toString();
     private String userId;
     private String packageId;
     private String voucherId;
-
+    private String vnpTxnRef;
     private Double totalPrice;
 
     @Builder.Default
     private OrderStatus status = OrderStatus.PENDING;
-    private String vnpTxnRef;
-
     private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 }
