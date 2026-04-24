@@ -78,7 +78,6 @@ public class OrderController {
     }
 
     @GetMapping("/status")
-    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<List<EnumResponse>> getOrderStatuses() {
         return ApiResponse.<List<EnumResponse>>builder()
                 .code(200)
