@@ -12,6 +12,7 @@ import java.util.Optional;
 public interface OrderRepository extends MongoRepository<Order, String> {
     Optional<Order> findByVnpTxnRef(String vnpTxnRef);
     Optional<Order> findFirstByUserIdAndStatusOrderByCreatedAtDesc(String userId, OrderStatus status);
+    List<Order> findAllByUserId(String userId);
     List<Order> findAllByOrderByCreatedAtDesc();
     List<Order> findAllByStatusOrderByCreatedAtDesc(OrderStatus status);
     List<Order> findAllByUserIdOrderByCreatedAtDesc(String userId);

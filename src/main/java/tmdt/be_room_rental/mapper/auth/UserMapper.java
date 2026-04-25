@@ -20,7 +20,7 @@ public class UserMapper {
                 .avatar(user.getAvatar())
                 .postQuota(user.getPostQuota())
                 .boostQuota(user.getBoostQuota())
-                .vote(user.getVote())
+                .rate(user.getRate())
                 .role(user.getRole())
                 .build();
     }

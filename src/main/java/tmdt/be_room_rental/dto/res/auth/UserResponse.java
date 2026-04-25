@@ -14,6 +14,6 @@ public class UserResponse {
     private String avatar;
     private Integer postQuota;
     private Integer boostQuota;
-    private Double vote;
+    private Double rate;
     private RoleEnum role;
 }

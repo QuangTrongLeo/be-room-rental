@@ -46,6 +46,8 @@ public class OrderService implements IOrderService {
     @Override
     public OrderResponse createOrder(OrderRequest request) {
         User user = securityService.getCurrentUser();
+        Packages pkg = packageService.findPackageById(request.getPackageId());
+        validateQuotaBeforeOrder(user, pkg.getType());
         Order order = buildOrder(user, request);
         Order savedOrder = orderRepository.save(order);
 
@@ -169,6 +171,22 @@ public class OrderService implements IOrderService {
     private Order findByVnpTxnRef(String vnpTxnRef) {
         return orderRepository.findByVnpTxnRef(vnpTxnRef)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với mã giao dịch: " + vnpTxnRef));
+    }
+
+    private void validateQuotaBeforeOrder(User user, PackageType pkgType) {
+        if (PackageType.POSTING.equals(pkgType)) {
+            // Kiểm tra lượt đăng bài
+            int currentPostQuota = (user.getPostQuota() != null) ? user.getPostQuota() : 0;
+            if (currentPostQuota > 0) {
+                throw new RuntimeException("Bạn vẫn còn " + currentPostQuota + " lượt đăng bài. Hãy sử dụng hết trước khi mua thêm gói mới!");
+            }
+        } else if (PackageType.BOOSTING.equals(pkgType)) {
+            // Kiểm tra lượt đẩy bài
+            int currentBoostQuota = (user.getBoostQuota() != null) ? user.getBoostQuota() : 0;
+            if (currentBoostQuota > 0) {
+                throw new RuntimeException("Bạn vẫn còn " + currentBoostQuota + " lượt đẩy bài. Hãy sử dụng hết trước khi mua thêm gói mới!");
+            }
+        }
     }
 
     private void handleOrderTimeout(String orderId) {
