@@ -134,20 +134,15 @@ public class PostService implements IPostService {
         PostStatus oldStatus = post.getStatus();
 
         boolean isAdmin = currentUser.getRole().equals(RoleEnum.ADMIN);
-        boolean isLandlord = currentUser.getRole().equals(RoleEnum.LANDLORD);
         boolean isOwner = post.getLandlordId().equals(currentUser.getId());
 
+        if (!isAdmin && !isOwner) {
+            throw new RuntimeException("Bạn không có quyền chỉnh sửa trạng thái bài đăng này.");
+        }
         if (isAdmin) {
-            // ADMIN: Có quyền chuyển sang bất cứ trạng thái nào
-            // Nếu Admin duyệt bài: PENDING -> ACTIVE
-            if (oldStatus == PostStatus.PENDING && newStatus == PostStatus.ACTIVE) {
-                executeApprovalPost(post);
-            }
-        } else if (isLandlord && isOwner) {
-            // LANDLORD: Chỉ được phép các luồng cụ thể
-            validateLandlordStatusTransition(oldStatus, newStatus, post);
+            handleAdminTransition(post, oldStatus, newStatus);
         } else {
-            throw new RuntimeException("Bạn không có quyền thực hiện hành động này.");
+            handleLandlordTransition(post, oldStatus, newStatus);
         }
 
         post.setStatus(newStatus);
@@ -220,59 +215,54 @@ public class PostService implements IPostService {
         return postRepository.findById(id).orElseThrow(() -> new RuntimeException("Không tìm thấy Post"));
     }
 
-    /**
-     * Logic kiểm tra quyền chuyển đổi trạng thái dành cho Chủ trọ
-     */
-    private void validateLandlordStatusTransition(PostStatus oldStatus, PostStatus newStatus, Post post) {
-        // 1. EXPIRED -> PENDING: Đăng ký duyệt lại khi hết hạn
-        if (oldStatus == PostStatus.EXPIRED && newStatus == PostStatus.PENDING) return;
-
-        // 2. ACTIVE -> HIDDEN: Chủ trọ muốn tạm ẩn bài đang đăng
-        if (oldStatus == PostStatus.ACTIVE && newStatus == PostStatus.HIDDEN) return;
-
-        // 3. HIDDEN -> ACTIVE: Hiện lại bài (Chỉ khi đã từng được duyệt - có approvedAt)
-        if (oldStatus == PostStatus.HIDDEN && newStatus == PostStatus.ACTIVE) {
-            if (post.getApprovedAt() == null) {
-                throw new RuntimeException("Bài đăng chưa được duyệt nên không thể tự hiển thị.");
+    private void handleAdminTransition(Post post, PostStatus oldStatus, PostStatus newStatus) {
+        if (newStatus == PostStatus.ACTIVE && oldStatus == PostStatus.PENDING) {
+            User landlord = userService.findUserById(post.getLandlordId());
+            if (landlord.getPostQuota() <= 0) {
+                throw new RuntimeException("Chủ trọ đã hết lượt đăng bài.");
             }
-            // Kiểm tra xem bài có còn trong hạn dùng không
-            if (post.getExpiredAt() != null && post.getExpiredAt().isBefore(LocalDateTime.now())) {
-                throw new RuntimeException("Bài đăng đã hết hạn, vui lòng chuyển về Chờ duyệt để gia hạn.");
-            }
-            return;
+
+            // Lấy gói dịch vụ thành công mới nhất
+            Order latestOrder = orderService.findNewOrderOfUser(landlord.getId(), OrderStatus.SUCCESS);
+            Packages pkg = packageService.findPackageById(latestOrder.getPackageId());
+
+            // Trừ lượt đăng
+            landlord.setPostQuota(landlord.getPostQuota() - 1);
+            userRepository.save(landlord);
+
+            // Thiết lập thời gian
+            LocalDateTime now = LocalDateTime.now();
+            post.setApprovedAt(now);
+            LocalDateTime expiredAt = now.plusDays(pkg.getActiveDays());
+            post.setExpiredAt(expiredAt);
+
+            // Lập lịch ẩn bài
+            taskScheduler.schedule(() -> {
+                handlePostExpiration(post.getId());
+            }, java.sql.Timestamp.valueOf(expiredAt).toInstant());
         }
-
-        throw new RuntimeException("Chủ trọ không được phép chuyển trạng thái từ " + oldStatus + " sang " + newStatus);
     }
 
-    /**
-     * Logic nghiệp vụ khi bài đăng được chuyển sang ACTIVE (Trừ Quota, Tính ngày, Lập lịch)
-     */
-    private void executeApprovalPost(Post post) {
-        User landlord = userService.findUserById(post.getLandlordId());
+    private void handleLandlordTransition(Post post, PostStatus oldStatus, PostStatus newStatus) {
+        boolean isValid = switch (oldStatus) {
+            case EXPIRED -> newStatus == PostStatus.PENDING;
+            case ACTIVE -> newStatus == PostStatus.HIDDEN;
+            case HIDDEN -> {
+                if (newStatus != PostStatus.ACTIVE) yield false;
+                if (post.getApprovedAt() == null) {
+                    throw new RuntimeException("Bài đăng chưa được duyệt nên không thể tự hiển thị.");
+                }
+                if (post.getExpiredAt() != null && post.getExpiredAt().isBefore(LocalDateTime.now())) {
+                    throw new RuntimeException("Bài đăng đã hết hạn, vui lòng chuyển về PENDING để gia hạn.");
+                }
+                yield true;
+            }
+            default -> false;
+        };
 
-        if (landlord.getPostQuota() <= 0) {
-            throw new RuntimeException("Chủ trọ đã hết lượt đăng bài.");
+        if (!isValid) {
+            throw new RuntimeException("Chủ trọ không được phép chuyển trạng thái từ " + oldStatus + " sang " + newStatus);
         }
-
-        // Lấy gói dịch vụ thành công mới nhất
-        Order latestOrder = orderService.findOrderOfLandlord(landlord.getId(), OrderStatus.SUCCESS);
-        Packages pkg = packageService.findPackageById(latestOrder.getPackageId());
-
-        // Trừ lượt đăng
-        landlord.setPostQuota(landlord.getPostQuota() - 1);
-        userRepository.save(landlord);
-
-        // Thiết lập thời gian
-        LocalDateTime now = LocalDateTime.now();
-        post.setApprovedAt(now);
-        LocalDateTime expiredAt = now.plusDays(pkg.getActiveDays());
-        post.setExpiredAt(expiredAt);
-
-        // Lập lịch ẩn bài
-        taskScheduler.schedule(() -> {
-            handlePostExpiration(post.getId());
-        }, java.sql.Timestamp.valueOf(expiredAt).toInstant());
     }
 
     private void handlePostExpiration(String postId) {

@@ -150,7 +150,7 @@ public class OrderService implements IOrderService {
                 .orElseThrow(() -> new RuntimeException("Đơn hàng không tồn tại với ID: " + id));
     }
 
-    public Order findOrderOfLandlord(String landlordId, OrderStatus status){
+    public Order findNewOrderOfUser(String landlordId, OrderStatus status){
         return orderRepository.findFirstByUserIdAndStatusOrderByCreatedAtDesc(landlordId, status)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy gói dịch vụ hợp lệ bài đăng."));
     }
