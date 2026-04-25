@@ -50,10 +50,6 @@ public class PostService implements IPostService {
     public PostResponse createPost(PostRequest request) {
         User currentUser = securityService.getCurrentUser();
 
-        if (currentUser.getPostQuota() <= 0) {
-            throw new RuntimeException("Bạn đã hết lượt đăng bài. Vui lòng mua thêm gói.");
-        }
-
         // Kiểm tra ảnh
         if (request.getImages() != null && request.getImages().size() > MAX_IMAGES) {
             throw new RuntimeException("Chỉ được upload tối đa " + MAX_IMAGES + " ảnh");
@@ -140,7 +136,6 @@ public class PostService implements IPostService {
             throw new RuntimeException("Bạn không có quyền chỉnh sửa trạng thái bài đăng này.");
         }
         if (isAdmin) {
-            handleAdminTransition(post, oldStatus, newStatus);
         } else {
             handleLandlordTransition(post, oldStatus, newStatus);
         }
@@ -215,34 +210,6 @@ public class PostService implements IPostService {
         return postRepository.findById(id).orElseThrow(() -> new RuntimeException("Không tìm thấy Post"));
     }
 
-    private void handleAdminTransition(Post post, PostStatus oldStatus, PostStatus newStatus) {
-        if (newStatus == PostStatus.ACTIVE && oldStatus == PostStatus.PENDING) {
-            User landlord = userService.findUserById(post.getLandlordId());
-            if (landlord.getPostQuota() <= 0) {
-                throw new RuntimeException("Chủ trọ đã hết lượt đăng bài.");
-            }
-
-            // Lấy gói dịch vụ thành công mới nhất
-            Order latestOrder = orderService.findNewOrderOfUser(landlord.getId(), OrderStatus.SUCCESS);
-            Packages pkg = packageService.findPackageById(latestOrder.getPackageId());
-
-            // Trừ lượt đăng
-            landlord.setPostQuota(landlord.getPostQuota() - 1);
-            userRepository.save(landlord);
-
-            // Thiết lập thời gian
-            LocalDateTime now = LocalDateTime.now();
-            post.setApprovedAt(now);
-            LocalDateTime expiredAt = now.plusDays(pkg.getActiveDays());
-            post.setExpiredAt(expiredAt);
-
-            // Lập lịch ẩn bài
-            taskScheduler.schedule(() -> {
-                handlePostExpiration(post.getId());
-            }, java.sql.Timestamp.valueOf(expiredAt).toInstant());
-        }
-    }
-
     private void handleLandlordTransition(Post post, PostStatus oldStatus, PostStatus newStatus) {
         boolean isValid = switch (oldStatus) {
             case EXPIRED -> newStatus == PostStatus.PENDING;
@@ -270,6 +237,17 @@ public class PostService implements IPostService {
             if (post.getStatus() == PostStatus.ACTIVE) {
                 post.setStatus(PostStatus.EXPIRED);
                 postRepository.save(post);
+            }
+        });
+    }
+
+    private void removePostBoost(String postId) {
+        postRepository.findById(postId).ifPresent(post -> {
+            if (post.getIsBoosted()) {
+                post.setIsBoosted(false);
+                post.setBoostExpiredAt(null); // Xóa ngày hết hạn boost
+                postRepository.save(post);
+                System.out.println("LOG: Bài đăng " + postId + " đã hết hạn Boost (5 ngày).");
             }
         });
     }

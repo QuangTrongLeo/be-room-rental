@@ -111,13 +111,4 @@ public class OrderController {
                 .data(orderService.getFailedOrders())
                 .build();
     }
-
-    @GetMapping("/expired")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<List<OrderResponse>> getExpiredOrders() {
-        return ApiResponse.<List<OrderResponse>>builder()
-                .code(200)
-                .data(orderService.getExpiredOrders())
-                .build();
-    }
 }

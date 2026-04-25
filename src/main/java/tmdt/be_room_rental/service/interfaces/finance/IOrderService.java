@@ -16,7 +16,6 @@ public interface IOrderService {
     List<OrderResponse> getPendingOrders();
     List<OrderResponse> getSuccessOrders();
     List<OrderResponse> getFailedOrders();
-    List<OrderResponse> getExpiredOrders();
     List<OrderResponse> getMyOrders();
     void deleteOrder(String id);
 }

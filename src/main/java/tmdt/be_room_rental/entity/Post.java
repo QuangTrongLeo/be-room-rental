@@ -53,5 +53,6 @@ public class Post {
     // --- Thời gian ---
     private LocalDateTime createdAt;
     private LocalDateTime approvedAt;
+    private LocalDateTime boostExpiredAt;
     private LocalDateTime expiredAt;
 }
