@@ -52,6 +52,6 @@ public class Post {
 
     // --- Thời gian ---
     private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private LocalDateTime approvedAt;
     private LocalDateTime expiredAt;
 }

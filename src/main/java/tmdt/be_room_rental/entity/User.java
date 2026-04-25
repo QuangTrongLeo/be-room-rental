@@ -21,6 +21,9 @@ public class User {
     private String password;
     private String phone;
     private String avatar;
+    private Integer postQuota = 0;
+    private Integer boostQuota = 0;
+    private Double vote = 0.0;
     private RoleEnum role;
     private boolean isVerified = false;
     private boolean isActive = true;

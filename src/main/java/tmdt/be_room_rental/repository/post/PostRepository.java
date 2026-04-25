@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 import tmdt.be_room_rental.entity.Post;
 import tmdt.be_room_rental.enums.status.PostStatus;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository

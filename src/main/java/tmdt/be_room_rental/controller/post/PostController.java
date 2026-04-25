@@ -119,7 +119,7 @@ public class PostController {
     }
 
     @PutMapping("/{id}/status")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LANDLORD')")
     public ApiResponse<PostResponse> updateStatusPost(@PathVariable String id, @RequestBody PostRequest request) {
         return ApiResponse.<PostResponse>builder()
                 .code(200)

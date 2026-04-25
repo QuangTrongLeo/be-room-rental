@@ -12,5 +12,8 @@ public class UserResponse {
     private String email;
     private String phone;
     private String avatar;
+    private Integer postQuota;
+    private Integer boostQuota;
+    private Double vote;
     private RoleEnum role;
 }

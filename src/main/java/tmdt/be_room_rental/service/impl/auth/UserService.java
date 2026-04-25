@@ -81,7 +81,7 @@ public class UserService implements IUserService {
 
     @Override
     public UserResponse getUserById(String id) {
-        User user = getById(id);
+        User user = findUserById(id);
         return userMapper.toResponse(user);
     }
 
@@ -101,7 +101,7 @@ public class UserService implements IUserService {
                 .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
     }
 
-    public User getById(String id){
+    public User findUserById(String id){
         return userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
     }

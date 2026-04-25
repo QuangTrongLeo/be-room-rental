@@ -18,6 +18,9 @@ public class UserMapper {
                 .email(user.getEmail())
                 .phone(user.getPhone())
                 .avatar(user.getAvatar())
+                .postQuota(user.getPostQuota())
+                .boostQuota(user.getBoostQuota())
+                .vote(user.getVote())
                 .role(user.getRole())
                 .build();
     }
