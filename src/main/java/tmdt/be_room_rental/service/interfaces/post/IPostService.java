@@ -9,7 +9,7 @@ public interface IPostService {
     PostResponse updatePost(String id, PostRequest request);
     PostResponse approveActivePost(String id);
     PostResponse rejectActivePost(String id);
-    PostResponse updateStatusPost(String id, PostRequest request);
+    PostResponse republishPost(String id);
     PostResponse getPostById(String id);
     List<PostResponse> getMyPosts();
     List<PostResponse> getPosts();

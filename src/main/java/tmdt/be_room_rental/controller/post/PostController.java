@@ -133,18 +133,18 @@ public class PostController {
     public ApiResponse<PostResponse> rejectActivePost(@PathVariable String id) {
         return ApiResponse.<PostResponse>builder()
                 .code(200)
-                .message("Duyệt bài đăng thành công.")
+                .message("Từ chối duyệt bài.")
                 .data(postService.rejectActivePost(id))
                 .build();
     }
 
-    @PutMapping("/{id}/status")
-    @PreAuthorize("hasAnyRole('ADMIN', 'LANDLORD')")
-    public ApiResponse<PostResponse> updateStatusPost(@PathVariable String id, @RequestBody PostRequest request) {
+    @PutMapping("/republish/{id}")
+    @PreAuthorize("hasAnyRole('LANDLORD')")
+    public ApiResponse<PostResponse> republishPost(@PathVariable String id) {
         return ApiResponse.<PostResponse>builder()
                 .code(200)
-                .message("Cập nhật trạng thái bài đăng thành công.")
-                .data(postService.updateStatusPost(id, request))
+                .message("Đăng lại bài thành công.")
+                .data(postService.republishPost(id))
                 .build();
     }
 

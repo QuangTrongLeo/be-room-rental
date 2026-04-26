@@ -149,24 +149,23 @@ public class PostService implements IPostService {
 
     @Override
     @Transactional
-    public PostResponse updateStatusPost(String id, PostRequest request) {
+    public PostResponse republishPost(String id) {
         User currentUser = securityService.getCurrentUser();
         Post post = findPostById(id);
-        PostStatus newStatus = request.getStatus();
-        PostStatus oldStatus = post.getStatus();
 
-        boolean isAdmin = currentUser.getRole().equals(RoleEnum.ADMIN);
-        boolean isOwner = post.getLandlordId().equals(currentUser.getId());
+        if (!post.getLandlordId().equals(currentUser.getId())) throw new RuntimeException("Bạn không có quyền đăng lại bài này.");
 
-        if (!isAdmin && !isOwner) {
-            throw new RuntimeException("Bạn không có quyền chỉnh sửa trạng thái bài đăng này.");
-        }
-        if (isAdmin) {
-        } else {
-            handleLandlordTransition(post, oldStatus, newStatus);
+        inventoryService.checkInventoryAvailability(currentUser.getId(), PackageType.POSTING, post.getPostingTier());
+
+        if (post.getBoostingTier() != null) {
+            inventoryService.checkInventoryAvailability(currentUser.getId(), PackageType.BOOSTING, post.getBoostingTier());
         }
 
-        post.setStatus(newStatus);
+        post.setStatus(PostStatus.PENDING);
+        post.setCreatedAt(LocalDateTime.now());
+        post.setApprovedAt(null);
+        post.setExpiredAt(null);
+        post.setBoostExpiredAt(null);
         return postMapper.toResponse(postRepository.save(post));
     }
 
@@ -284,27 +283,4 @@ public class PostService implements IPostService {
             System.err.println("LOG: Lỗi xử lý hết hạn Boost: " + e.getMessage());
         }
     }
-
-    private void handleLandlordTransition(Post post, PostStatus oldStatus, PostStatus newStatus) {
-        boolean isValid = switch (oldStatus) {
-            case EXPIRED -> newStatus == PostStatus.PENDING;
-            case ACTIVE -> newStatus == PostStatus.HIDDEN;
-            case HIDDEN -> {
-                if (newStatus != PostStatus.ACTIVE) yield false;
-                if (post.getApprovedAt() == null) {
-                    throw new RuntimeException("Bài đăng chưa được duyệt nên không thể tự hiển thị.");
-                }
-                if (post.getExpiredAt() != null && post.getExpiredAt().isBefore(LocalDateTime.now())) {
-                    throw new RuntimeException("Bài đăng đã hết hạn, vui lòng chuyển về PENDING để gia hạn.");
-                }
-                yield true;
-            }
-            default -> false;
-        };
-
-        if (!isValid) {
-            throw new RuntimeException("Chủ trọ không được phép chuyển trạng thái từ " + oldStatus + " sang " + newStatus);
-        }
-    }
-
 }
