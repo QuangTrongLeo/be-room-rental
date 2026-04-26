@@ -44,16 +44,17 @@ public class PostService implements IPostService {
     private final PostMapper postMapper;
 
     private static final int MAX_IMAGES = 8;
+    private final PackageService packageService;
 
     @Override
     public PostResponse createPost(PostRequest request) {
         User currentUser = securityService.getCurrentUser();
 
-        inventoryService.checkAvailability(currentUser.getId(), PackageType.POSTING, request.getPostingTier());
+        inventoryService.checkInventoryAvailability(currentUser.getId(), PackageType.POSTING, request.getPostingTier());
 
         // Kiểm tra lượt Boost (Nếu người dùng có yêu cầu Boost)
         if (request.getBoostingTier() != null) {
-            inventoryService.checkAvailability(currentUser.getId(), PackageType.BOOSTING, request.getBoostingTier());
+            inventoryService.checkInventoryAvailability(currentUser.getId(), PackageType.BOOSTING, request.getBoostingTier());
         }
 
         // Kiểm tra ảnh
@@ -108,6 +109,44 @@ public class PostService implements IPostService {
             post.setImages(newUrls);
         }
 
+        return postMapper.toResponse(postRepository.save(post));
+    }
+
+    @Override
+    @Transactional
+    public PostResponse approveActivePost(String id) {
+        Post post = findPostById(id);
+        if (post.getStatus() != PostStatus.PENDING) {
+            throw new RuntimeException("Bài đăng không ở trạng thái chờ duyệt.");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+
+        // Xử lý gói Đăng bài (Posting) - Bắt buộc
+        Packages pkgPosting = packageService.findPackageByTypeAndTier(PackageType.POSTING, post.getPostingTier());
+        inventoryService.consumeInventory(post.getLandlordId(), PackageType.POSTING, post.getPostingTier());
+
+        post.setStatus(PostStatus.ACTIVE);
+        post.setApprovedAt(now);
+        post.setExpiredAt(now.plusDays(pkgPosting.getActiveDays()));
+
+        // Xử lý gói Đẩy bài (Boosting) - Tùy chọn
+        if (post.getBoostingTier() != null) {
+            Packages pkgBoosting = packageService.findPackageByTypeAndTier(PackageType.BOOSTING, post.getBoostingTier());
+            inventoryService.consumeInventory(post.getLandlordId(), PackageType.BOOSTING, post.getBoostingTier());
+            post.setBoostExpiredAt(now.plusDays(pkgBoosting.getActiveDays()));
+        }
+
+        return postMapper.toResponse(postRepository.save(post));
+    }
+
+    @Override
+    public PostResponse rejectActivePost(String id) {
+        Post post = findPostById(id);
+        if (post.getStatus() != PostStatus.PENDING) {
+            throw new RuntimeException("Bài đăng không ở trạng thái chờ duyệt.");
+        }
+        post.setStatus(PostStatus.REJECTED);
         return postMapper.toResponse(postRepository.save(post));
     }
 

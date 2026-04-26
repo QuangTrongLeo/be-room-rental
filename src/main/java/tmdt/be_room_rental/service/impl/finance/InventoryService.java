@@ -52,7 +52,7 @@ public class InventoryService implements IInventoryService {
 
     @Override
     @Transactional(readOnly = true)
-    public void checkAvailability(String userId, PackageType type, PackageTier tier) {
+    public void checkInventoryAvailability(String userId, PackageType type, PackageTier tier) {
         // Tìm inventory, nếu không thấy nghĩa là người dùng chưa bao giờ mua gói này
         Inventory inventory = findInventory(userId, type, tier)
                 .orElseThrow(() -> new RuntimeException("Bạn không sở hữu gói " + type + " cấp độ " + tier));
@@ -61,6 +61,19 @@ public class InventoryService implements IInventoryService {
         if (isBalanceEmpty(inventory)) {
             throw new RuntimeException("Gói " + type + " cấp độ " + tier + " của bạn đã hết lượt sử dụng.");
         }
+    }
+
+    @Transactional
+    public void consumeInventory(String userId, PackageType type, PackageTier tier) {
+        Inventory inventory = findInventory(userId, type, tier)
+                .orElseThrow(() -> new RuntimeException("Người dùng không có gói " + type + " cấp độ " + tier));
+
+        if (inventory.getBalance() <= 0) {
+            throw new RuntimeException("Đã hết lượt sử dụng gói " + tier);
+        }
+
+        inventory.setBalance(inventory.getBalance() - 1);
+        inventoryRepository.save(inventory);
     }
 
     /**

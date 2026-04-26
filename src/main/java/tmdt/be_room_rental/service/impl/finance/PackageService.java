@@ -6,6 +6,8 @@ import tmdt.be_room_rental.dto.req.finance.PackageRequest;
 import tmdt.be_room_rental.dto.res.enums.EnumResponse;
 import tmdt.be_room_rental.dto.res.finance.PackageResponse;
 import tmdt.be_room_rental.entity.Packages;
+import tmdt.be_room_rental.enums.type.PackageTier;
+import tmdt.be_room_rental.enums.type.PackageType;
 import tmdt.be_room_rental.mapper.enums.PackageEnumMapper;
 import tmdt.be_room_rental.mapper.finance.PackageMapper;
 import tmdt.be_room_rental.repository.finance.PackageRepository;
@@ -79,5 +81,10 @@ public class PackageService implements IPackageService {
     public Packages findPackageById(String id) {
         return packageRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Gói dịch vụ không tồn tại với ID: " + id));
+    }
+
+    public Packages findPackageByTypeAndTier(PackageType type, PackageTier tier) {
+        return packageRepository.findByTypeAndTier(type, tier)
+                .orElseThrow(() -> new RuntimeException(String.format("Không tìm thấy cấu hình gói cho Loại: %s và Cấp độ: %s", type, tier)));
     }
 }

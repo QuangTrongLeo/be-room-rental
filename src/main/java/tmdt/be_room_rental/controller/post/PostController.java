@@ -118,6 +118,26 @@ public class PostController {
                 .build();
     }
 
+    @PutMapping("/approve/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    public ApiResponse<PostResponse> approveActivePost(@PathVariable String id) {
+        return ApiResponse.<PostResponse>builder()
+                .code(200)
+                .message("Duyệt bài đăng thành công.")
+                .data(postService.approveActivePost(id))
+                .build();
+    }
+
+    @PutMapping("/reject/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    public ApiResponse<PostResponse> rejectActivePost(@PathVariable String id) {
+        return ApiResponse.<PostResponse>builder()
+                .code(200)
+                .message("Duyệt bài đăng thành công.")
+                .data(postService.rejectActivePost(id))
+                .build();
+    }
+
     @PutMapping("/{id}/status")
     @PreAuthorize("hasAnyRole('ADMIN', 'LANDLORD')")
     public ApiResponse<PostResponse> updateStatusPost(@PathVariable String id, @RequestBody PostRequest request) {

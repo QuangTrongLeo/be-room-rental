@@ -11,5 +11,5 @@ public interface IInventoryService {
     List<InventoryResponse> getInventories();
     List<InventoryResponse> getMyInventories();
     void addPackageToInventory(String userId, Packages pkg);
-    void checkAvailability(String userId, PackageType type, PackageTier tier);
+    void checkInventoryAvailability(String userId, PackageType type, PackageTier tier);
 }
