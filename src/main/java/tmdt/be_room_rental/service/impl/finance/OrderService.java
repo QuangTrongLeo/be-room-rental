@@ -147,7 +147,7 @@ public class OrderService implements IOrderService {
 
     private void handleOrderTimeout(String orderId) {
         try {
-            Order order = orderRepository.findById(orderId).orElse(null);
+            Order order = findOrderById(orderId);
 
             // Nếu sau 10 phút đơn hàng vẫn là PENDING
             if (order != null && order.getStatus() == OrderStatus.PENDING) {
