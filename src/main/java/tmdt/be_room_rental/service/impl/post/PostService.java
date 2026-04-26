@@ -15,11 +15,13 @@ import tmdt.be_room_rental.entity.User;
 import tmdt.be_room_rental.enums.RoleEnum;
 import tmdt.be_room_rental.enums.status.OrderStatus;
 import tmdt.be_room_rental.enums.status.PostStatus;
+import tmdt.be_room_rental.enums.type.PackageType;
 import tmdt.be_room_rental.mapper.post.PostMapper;
 import tmdt.be_room_rental.repository.auth.UserRepository;
 import tmdt.be_room_rental.repository.post.PostRepository;
 import tmdt.be_room_rental.service.impl.auth.SecurityService;
 import tmdt.be_room_rental.service.impl.auth.UserService;
+import tmdt.be_room_rental.service.impl.finance.InventoryService;
 import tmdt.be_room_rental.service.impl.finance.OrderService;
 import tmdt.be_room_rental.service.impl.finance.PackageService;
 import tmdt.be_room_rental.service.interfaces.auth.ICloudinaryService;
@@ -34,12 +36,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PostService implements IPostService {
     private final PostRepository postRepository;
-    private final UserRepository userRepository;
+    private final InventoryService inventoryService;
     private final IPostHistoryService postHistoryService;
     private final ICloudinaryService cloudinaryService;
-    private final UserService userService;
-    private final PackageService packageService;
-    private final OrderService orderService;
     private final SecurityService securityService;
     private final TaskScheduler taskScheduler;
     private final PostMapper postMapper;
@@ -50,28 +49,19 @@ public class PostService implements IPostService {
     public PostResponse createPost(PostRequest request) {
         User currentUser = securityService.getCurrentUser();
 
+        inventoryService.checkAvailability(currentUser.getId(), PackageType.POSTING, request.getPostingTier());
+
+        // Kiểm tra lượt Boost (Nếu người dùng có yêu cầu Boost)
+        if (request.getBoostingTier() != null) {
+            inventoryService.checkAvailability(currentUser.getId(), PackageType.BOOSTING, request.getBoostingTier());
+        }
+
         // Kiểm tra ảnh
         if (request.getImages() != null && request.getImages().size() > MAX_IMAGES) {
             throw new RuntimeException("Chỉ được upload tối đa " + MAX_IMAGES + " ảnh");
         }
 
-        Post post = Post.builder()
-                .landlordId(currentUser.getId())
-                .title(request.getTitle())
-                .content(request.getContent())
-                .price(request.getPrice())
-                .status(PostStatus.PENDING)
-                .isBoosted(request.getIsBoosted() != null ? request.getIsBoosted() : false)
-                .address(request.getAddress())
-                .area(request.getArea())
-                .amenities(request.getAmenities())
-                .roomType(request.getRoomType())
-                .createdAt(LocalDateTime.now())
-                .build();
-
-        if (request.getLongitude() != null && request.getLatitude() != null) {
-            post.setLocation(new GeoJsonPoint(request.getLongitude(), request.getLatitude()));
-        }
+        Post post = buildPost(currentUser, request);
 
         if (request.getImages() != null && !request.getImages().isEmpty()) {
             List<String> urls = request.getImages().stream()
@@ -210,6 +200,32 @@ public class PostService implements IPostService {
         return postRepository.findById(id).orElseThrow(() -> new RuntimeException("Không tìm thấy Post"));
     }
 
+    private Post buildPost(User user, PostRequest request) {
+        Post post = Post.builder()
+                .landlordId(user.getId())
+                .title(request.getTitle())
+                .content(request.getContent())
+                .price(request.getPrice())
+                .area(request.getArea())
+                .address(request.getAddress())
+                .amenities(request.getAmenities())
+                .roomType(request.getRoomType())
+                .postingTier(request.getPostingTier())
+                .boostingTier(request.getBoostingTier())
+                .status(PostStatus.PENDING)
+                .createdAt(LocalDateTime.now())
+                .views(0)
+                .favorites(0)
+                .build();
+
+        // Xử lý tọa độ địa lý
+        if (request.getLongitude() != null && request.getLatitude() != null) {
+            post.setLocation(new GeoJsonPoint(request.getLongitude(), request.getLatitude()));
+        }
+
+        return post;
+    }
+
     private void handleLandlordTransition(Post post, PostStatus oldStatus, PostStatus newStatus) {
         boolean isValid = switch (oldStatus) {
             case EXPIRED -> newStatus == PostStatus.PENDING;
@@ -232,23 +248,4 @@ public class PostService implements IPostService {
         }
     }
 
-    private void handlePostExpiration(String postId) {
-        postRepository.findById(postId).ifPresent(post -> {
-            if (post.getStatus() == PostStatus.ACTIVE) {
-                post.setStatus(PostStatus.EXPIRED);
-                postRepository.save(post);
-            }
-        });
-    }
-
-    private void removePostBoost(String postId) {
-        postRepository.findById(postId).ifPresent(post -> {
-            if (post.getIsBoosted()) {
-                post.setIsBoosted(false);
-                post.setBoostExpiredAt(null); // Xóa ngày hết hạn boost
-                postRepository.save(post);
-                System.out.println("LOG: Bài đăng " + postId + " đã hết hạn Boost (5 ngày).");
-            }
-        });
-    }
 }

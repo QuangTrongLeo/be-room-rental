@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.index.GeoSpatialIndexed;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import tmdt.be_room_rental.enums.status.PostStatus;
+import tmdt.be_room_rental.enums.type.PackageTier;
 import tmdt.be_room_rental.enums.type.RoomType;
 
 import java.time.LocalDateTime;
@@ -27,25 +28,24 @@ public class Post {
     private String landlordId;
     private String title;
     private String content;
-
-    @Builder.Default
-    private PostStatus status = PostStatus.PENDING;
-
-    @Builder.Default
-    private Boolean isBoosted = false;
+    private String address;
 
     @Builder.Default
     private Integer views = 0;
     @Builder.Default
     private Integer favorites = 0;
 
-    // --- Thông tin đặc trưng của phòng ---
     private Double price;
     private Double area;
-    private String address;
+
     private List<String> amenities;
     private List<String> images;
+
     private RoomType roomType;
+    private PackageTier postingTier;
+    private PackageTier boostingTier;
+    @Builder.Default
+    private PostStatus status = PostStatus.PENDING;
 
     @GeoSpatialIndexed
     private GeoJsonPoint location;

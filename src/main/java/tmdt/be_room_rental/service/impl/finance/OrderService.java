@@ -9,6 +9,7 @@ import tmdt.be_room_rental.dto.req.finance.OrderRequest;
 import tmdt.be_room_rental.dto.res.enums.EnumResponse;
 import tmdt.be_room_rental.dto.res.finance.OrderResponse;
 import tmdt.be_room_rental.entity.Order;
+import tmdt.be_room_rental.entity.Packages;
 import tmdt.be_room_rental.entity.User;
 import tmdt.be_room_rental.enums.status.OrderStatus;
 import tmdt.be_room_rental.mapper.enums.OrderEnumMapper;
@@ -26,9 +27,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderService implements IOrderService {
     private final OrderRepository orderRepository;
-    private final UserRepository userRepository;
-    private final UserService userService;
     private final PackageService packageService;
+    private final InventoryService inventoryService;
     private final SecurityService securityService;
     private final OrderEnumMapper orderEnumMapper;
     private final OrderMapper orderMapper;
@@ -109,6 +109,8 @@ public class OrderService implements IOrderService {
         if (order.getStatus() == OrderStatus.PENDING) {
             order.setStatus(OrderStatus.SUCCESS);
             orderRepository.save(order);
+            Packages pkg = packageService.findPackageById(order.getPackageId());
+            inventoryService.addPackageToInventory(order.getUserId(), pkg);
         }
     }
 
