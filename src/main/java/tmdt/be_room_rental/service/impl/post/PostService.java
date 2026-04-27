@@ -104,7 +104,7 @@ public class PostService implements IPostService {
 
     @Override
     @Transactional
-    public PostResponse approveActivePost(String id) {
+    public PostResponse approvePost(String id) {
         Post post = findPostById(id);
         if (post.getStatus() != PostStatus.PENDING) {
             throw new RuntimeException("Bài đăng không ở trạng thái chờ duyệt.");
@@ -140,7 +140,7 @@ public class PostService implements IPostService {
     }
 
     @Override
-    public PostResponse rejectActivePost(String id) {
+    public PostResponse rejectPost(String id) {
         Post post = findPostById(id);
         if (post.getStatus() != PostStatus.PENDING) throw new RuntimeException("Bài đăng không ở trạng thái chờ duyệt.");
         post.setStatus(PostStatus.REJECTED);
@@ -166,6 +166,33 @@ public class PostService implements IPostService {
         post.setApprovedAt(null);
         post.setExpiredAt(null);
         post.setBoostExpiredAt(null);
+        return postMapper.toResponse(postRepository.save(post));
+    }
+
+    @Override
+    @Transactional
+    public PostResponse toggleActiveHiddenPost(String id) {
+        User currentUser = securityService.getCurrentUser();
+        Post post = findPostById(id);
+        PostStatus currentStatus = post.getStatus();
+
+        boolean isAdmin = currentUser.getRole().equals(RoleEnum.ADMIN);
+        boolean isOwner = post.getLandlordId().equals(currentUser.getId());
+
+        if (!isAdmin && !isOwner) throw new RuntimeException("Bạn không có quyền chỉnh sửa bài đăng của người khác.");
+        if (currentStatus == PostStatus.ACTIVE) {
+            post.setStatus(PostStatus.HIDDEN);
+        }
+        else if (currentStatus == PostStatus.HIDDEN) {
+            if (post.getApprovedAt() == null) {
+                throw new RuntimeException("Bài đăng chưa được duyệt, không thể hiển thị.");
+            }
+            if (post.getExpiredAt() != null && post.getExpiredAt().isBefore(LocalDateTime.now())) {
+                throw new RuntimeException("Bài đăng đã hết hạn. Hãy thực hiện 'Đăng lại' để gia hạn.");
+            }
+            post.setStatus(PostStatus.ACTIVE);
+        }
+
         return postMapper.toResponse(postRepository.save(post));
     }
 

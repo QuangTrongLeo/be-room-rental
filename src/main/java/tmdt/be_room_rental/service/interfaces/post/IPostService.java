@@ -7,9 +7,10 @@ import java.util.List;
 public interface IPostService {
     PostResponse createPost(PostRequest request);
     PostResponse updatePost(String id, PostRequest request);
-    PostResponse approveActivePost(String id);
-    PostResponse rejectActivePost(String id);
+    PostResponse approvePost(String id);
+    PostResponse rejectPost(String id);
     PostResponse republishPost(String id);
+    PostResponse toggleActiveHiddenPost(String id);
     PostResponse getPostById(String id);
     List<PostResponse> getMyPosts();
     List<PostResponse> getPosts();
