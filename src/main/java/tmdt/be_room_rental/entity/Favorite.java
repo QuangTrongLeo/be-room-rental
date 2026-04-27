@@ -18,6 +18,6 @@ public class Favorite {
     private String id = UUID.randomUUID().toString();
 
     private String userId;
-    private String roomId;
+    private String postId;
     private LocalDateTime createdAt;
 }

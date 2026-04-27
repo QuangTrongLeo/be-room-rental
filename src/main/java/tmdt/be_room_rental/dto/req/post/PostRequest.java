@@ -3,6 +3,7 @@ package tmdt.be_room_rental.dto.req.post;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 import tmdt.be_room_rental.enums.status.PostStatus;
+import tmdt.be_room_rental.enums.type.PackageTier;
 import tmdt.be_room_rental.enums.type.RoomType;
 
 import java.util.List;
@@ -18,7 +19,8 @@ public class PostRequest {
     private Double longitude;
     private PostStatus status;
     private RoomType roomType;
-    private Boolean isBoosted;
+    private PackageTier postingTier;
+    private PackageTier boostingTier;
     private List<MultipartFile> images;
     private List<String> amenities;
 }

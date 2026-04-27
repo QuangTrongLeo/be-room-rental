@@ -18,6 +18,7 @@ public class UserMapper {
                 .email(user.getEmail())
                 .phone(user.getPhone())
                 .avatar(user.getAvatar())
+                .rating(user.getRating())
                 .role(user.getRole())
                 .build();
     }

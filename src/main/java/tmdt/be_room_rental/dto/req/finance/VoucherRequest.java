@@ -1,13 +1,19 @@
 package tmdt.be_room_rental.dto.req.finance;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import tmdt.be_room_rental.enums.type.VoucherType;
 
+import java.time.LocalDate;
+
 @Data
 public class VoucherRequest {
-    private String code;
+    private Integer quantity;
     private Double discountPercentage;
     private Double maxDiscountAmount;
-    private Integer quantity;
-    private VoucherType type; // WEEK hoặc MONTH
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+    private LocalDate startedAt;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+    private LocalDate expiredAt;
+    private Boolean isActive;
 }

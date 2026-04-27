@@ -1,10 +1,12 @@
 package tmdt.be_room_rental.service.impl.auth;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tmdt.be_room_rental.dto.req.auth.VerifyOtpRequest;
 import tmdt.be_room_rental.entity.OtpVerification;
+import tmdt.be_room_rental.entity.User;
 import tmdt.be_room_rental.repository.auth.OtpVerificationRepository;
 import tmdt.be_room_rental.service.interfaces.auth.IOtpService;
 
@@ -18,6 +20,7 @@ public class OtpService implements IOtpService {
     private final OtpVerificationRepository otpRepository;
     private final UserService userService;
     private final EmailService emailService;
+    private final TaskScheduler taskScheduler;
 
     private static final int OTP_EXPIRY_MINUTES = 5;
 
@@ -32,6 +35,11 @@ public class OtpService implements IOtpService {
         saveOtpEntry(email, otp);
         // 4. Gửi mail
         emailService.sendOtp(email, otp);
+
+        // 5. Lập lịch kiểm tra sau 5 phút
+        taskScheduler.schedule(() -> {
+            cleanupUnverifiedUser(email);
+        }, java.sql.Timestamp.valueOf(LocalDateTime.now().plusMinutes(OTP_EXPIRY_MINUTES)).toInstant());
     }
 
     @Override
@@ -69,5 +77,13 @@ public class OtpService implements IOtpService {
         return otpRepository
                 .findByEmailAndOtp(email, otp)
                 .orElseThrow(() -> new RuntimeException("Mã OTP không chính xác"));
+    }
+
+    private void cleanupUnverifiedUser(String email) {
+        User user = userService.getUserByEmail(email);
+        if (!user.isVerified()) {
+            userService.deleteUser(user.getId());
+            otpRepository.deleteByEmail(email);
+        }
     }
 }

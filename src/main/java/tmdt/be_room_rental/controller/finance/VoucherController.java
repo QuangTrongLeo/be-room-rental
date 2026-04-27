@@ -19,7 +19,7 @@ public class VoucherController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<VoucherResponse> create(@RequestBody VoucherRequest request) {
+    public ApiResponse<VoucherResponse> createVoucher(@RequestBody VoucherRequest request) {
         return ApiResponse.<VoucherResponse>builder()
                 .code(200)
                 .message("Tạo voucher thành công.")
@@ -29,7 +29,7 @@ public class VoucherController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<VoucherResponse> update(@PathVariable String id, @RequestBody VoucherRequest request) {
+    public ApiResponse<VoucherResponse> updateVoucher(@PathVariable String id, @RequestBody VoucherRequest request) {
         return ApiResponse.<VoucherResponse>builder()
                 .code(200)
                 .message("Cập nhật thành công.")
@@ -37,29 +37,39 @@ public class VoucherController {
                 .build();
     }
 
+    @PutMapping("/active/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<VoucherResponse> updateVoucherActive(@PathVariable String id, @RequestBody boolean isActive) {
+        return ApiResponse.<VoucherResponse>builder()
+                .code(200)
+                .data(voucherService.updateActiveVoucher(id, isActive))
+                .build();
+    }
+
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<List<VoucherResponse>> getAll() {
+    public ApiResponse<List<VoucherResponse>> getVouchers() {
         return ApiResponse.<List<VoucherResponse>>builder()
                 .code(200)
                 .data(voucherService.getVouchers())
                 .build();
     }
 
-    @GetMapping("/code/{code}")
-    public ApiResponse<VoucherResponse> getByCode(@PathVariable String code) {
-        return ApiResponse.<VoucherResponse>builder()
+    @GetMapping("/active")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LANDLORD')")
+    public ApiResponse<List<VoucherResponse>> getActiveVouchers() {
+        return ApiResponse.<List<VoucherResponse>>builder()
                 .code(200)
-                .data(voucherService.getVoucherByCode(code))
+                .data(voucherService.getActiveVouchers())
                 .build();
     }
 
-    @PatchMapping("/{id}/status")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<VoucherResponse> toggleStatus(@PathVariable String id, @RequestParam boolean isActive) {
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LANDLORD')")
+    public ApiResponse<VoucherResponse> getVoucher(@PathVariable String id) {
         return ApiResponse.<VoucherResponse>builder()
                 .code(200)
-                .data(voucherService.toggleVoucherStatus(id, isActive))
+                .data(voucherService.getVoucherById(id))
                 .build();
     }
 
@@ -75,21 +85,5 @@ public class VoucherController {
     public ApiResponse<Void> hardDelete(@PathVariable String id) {
         voucherService.deleteVoucher(id);
         return ApiResponse.<Void>builder().code(200).message("Đã xóa vĩnh viễn.").build();
-    }
-
-    @GetMapping("/validate")
-    public ApiResponse<Boolean> validate(@RequestParam String code) {
-        return ApiResponse.<Boolean>builder()
-                .code(200)
-                .data(voucherService.isValidVoucher(code))
-                .build();
-    }
-
-    @GetMapping("/calculate")
-    public ApiResponse<Double> calculate(@RequestParam String code, @RequestParam Double totalAmount) {
-        return ApiResponse.<Double>builder()
-                .code(200)
-                .data(voucherService.calculateDiscount(code, totalAmount))
-                .build();
     }
 }

@@ -26,15 +26,23 @@ public class UserService implements IUserService {
     private final UserMapper userMapper;
 
     @Override
-    public UserResponse getMyProfile() {
-        User user = securityService.getCurrentUser();
-        return userMapper.toResponse(user);
-    }
+    public User createUser(RegisterRequest request) {
+        RoleEnum role = determineRole(request.getRole());
+        ProviderType provider = determineProvider(request.getProvider());
+        User user = User.builder()
+                .username(request.getUsername())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .phone(request.getPhone())
+                .avatar("")
+                .role(role)
+                .isVerified(false)
+                .isActive(true)
+                .provider(provider)
+                .createdAt(LocalDateTime.now())
+                .build();
 
-    @Override
-    public UserResponse getUserById(String id) {
-        User user = getById(id);
-        return userMapper.toResponse(user);
+        return userRepository.save(user);
     }
 
     @Override
@@ -66,30 +74,26 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public List<UserResponse> getAllUsers() {
+    public UserResponse getMyProfile() {
+        User user = securityService.getCurrentUser();
+        return userMapper.toResponse(user);
+    }
+
+    @Override
+    public UserResponse getUserById(String id) {
+        User user = findUserById(id);
+        return userMapper.toResponse(user);
+    }
+
+    @Override
+    public List<UserResponse> getUsers() {
         List<User> users = userRepository.findAll();
         return userMapper.toResponseList(users);
     }
 
-    public User createUser(RegisterRequest request) {
-        RoleEnum role = determineRole(request.getRole());
-
-        ProviderType provider = determineProvider(request.getProvider());
-
-        User user = User.builder()
-                .username(request.getUsername())
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .phone(request.getPhone())
-                .avatar("")
-                .role(role)
-                .isVerified(false)
-                .isActive(true)
-                .provider(provider)
-                .createdAt(LocalDateTime.now())
-                .build();
-
-        return userRepository.save(user);
+    @Override
+    public void deleteUser(String id) {
+        userRepository.deleteById(id);
     }
 
     public User getUserByEmail(String email){
@@ -97,7 +101,7 @@ public class UserService implements IUserService {
                 .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
     }
 
-    public User getById(String id){
+    public User findUserById(String id){
         return userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
     }

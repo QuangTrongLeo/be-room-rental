@@ -118,13 +118,43 @@ public class PostController {
                 .build();
     }
 
-    @PutMapping("/{id}/status")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<PostResponse> updateStatusPost(@PathVariable String id, @RequestBody PostRequest request) {
+    @PutMapping("/approve/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    public ApiResponse<PostResponse> approvePost(@PathVariable String id) {
         return ApiResponse.<PostResponse>builder()
                 .code(200)
-                .message("Cập nhật trạng thái bài đăng thành công.")
-                .data(postService.updateStatusPost(id, request))
+                .message("Duyệt bài đăng thành công.")
+                .data(postService.approvePost(id))
+                .build();
+    }
+
+    @PutMapping("/reject/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    public ApiResponse<PostResponse> rejectPost(@PathVariable String id) {
+        return ApiResponse.<PostResponse>builder()
+                .code(200)
+                .message("Từ chối duyệt bài.")
+                .data(postService.rejectPost(id))
+                .build();
+    }
+
+    @PutMapping("/republish/{id}")
+    @PreAuthorize("hasAnyRole('LANDLORD')")
+    public ApiResponse<PostResponse> republishPost(@PathVariable String id) {
+        return ApiResponse.<PostResponse>builder()
+                .code(200)
+                .message("Đăng lại bài thành công.")
+                .data(postService.republishPost(id))
+                .build();
+    }
+
+    @PutMapping("/toggle-active-hidden/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LANDLORD')")
+    public ApiResponse<PostResponse> toggleActiveHiddenPost(@PathVariable String id) {
+        return ApiResponse.<PostResponse>builder()
+                .code(200)
+                .message("Cập nhật trạng thái hiển thị thành silence thành công.")
+                .data(postService.toggleActiveHiddenPost(id))
                 .build();
     }
 

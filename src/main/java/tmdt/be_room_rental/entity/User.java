@@ -21,6 +21,7 @@ public class User {
     private String password;
     private String phone;
     private String avatar;
+    private Double rating = 0.0;
     private RoleEnum role;
     private boolean isVerified = false;
     private boolean isActive = true;

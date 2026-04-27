@@ -3,6 +3,7 @@ package tmdt.be_room_rental.dto.res.post;
 import lombok.Builder;
 import lombok.Data;
 import tmdt.be_room_rental.enums.status.PostStatus;
+import tmdt.be_room_rental.enums.type.PackageTier;
 import tmdt.be_room_rental.enums.type.RoomType;
 
 import java.time.LocalDateTime;
@@ -24,7 +25,8 @@ public class PostResponse {
     private Integer favorites;
     private PostStatus status;
     private RoomType roomType;
-    private Boolean isBoosted;
+    private PackageTier postingTier;
+    private PackageTier boostingTier;
     private List<String> images;
     private List<AmenityResponse> amenities;
     private LocalDateTime createdAt;
