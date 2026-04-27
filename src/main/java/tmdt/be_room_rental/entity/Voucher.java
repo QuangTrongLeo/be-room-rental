@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import tmdt.be_room_rental.enums.type.VoucherType;
 
 import java.time.LocalDateTime;
 import java.util.List;

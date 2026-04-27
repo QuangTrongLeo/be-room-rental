@@ -6,6 +6,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import tmdt.be_room_rental.dto.req.post.PostRequest;
 import tmdt.be_room_rental.dto.res.ApiResponse;
+import tmdt.be_room_rental.dto.res.enums.EnumResponse;
 import tmdt.be_room_rental.dto.res.post.PostHistoryResponse;
 import tmdt.be_room_rental.dto.res.post.PostResponse;
 import tmdt.be_room_rental.service.interfaces.post.IPostHistoryService;
@@ -28,6 +29,74 @@ public class PostController {
                 .code(200)
                 .message("Tạo bài đăng thành công.")
                 .data(postService.createPost(request))
+                .build();
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LANDLORD')")
+    public ApiResponse<PostResponse> updatePost(@PathVariable String id, @ModelAttribute @Valid PostRequest request) {
+        return ApiResponse.<PostResponse>builder()
+                .code(200)
+                .message("Cập nhật bài đăng thành công.")
+                .data(postService.updatePost(id, request))
+                .build();
+    }
+
+    @PutMapping("/approve/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    public ApiResponse<PostResponse> approvePost(@PathVariable String id) {
+        return ApiResponse.<PostResponse>builder()
+                .code(200)
+                .message("Duyệt bài đăng thành công.")
+                .data(postService.approvePost(id))
+                .build();
+    }
+
+    @PutMapping("/reject/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    public ApiResponse<PostResponse> rejectPost(@PathVariable String id) {
+        return ApiResponse.<PostResponse>builder()
+                .code(200)
+                .message("Từ chối duyệt bài.")
+                .data(postService.rejectPost(id))
+                .build();
+    }
+
+    @PutMapping("/republish/{id}")
+    @PreAuthorize("hasAnyRole('LANDLORD')")
+    public ApiResponse<PostResponse> republishPost(@PathVariable String id) {
+        return ApiResponse.<PostResponse>builder()
+                .code(200)
+                .message("Đăng lại bài thành công.")
+                .data(postService.republishPost(id))
+                .build();
+    }
+
+    @PutMapping("/toggle-active-hidden/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LANDLORD')")
+    public ApiResponse<PostResponse> toggleActiveHiddenPost(@PathVariable String id) {
+        return ApiResponse.<PostResponse>builder()
+                .code(200)
+                .message("Cập nhật trạng thái hiển thị thành silence thành công.")
+                .data(postService.toggleActiveHiddenPost(id))
+                .build();
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LANDLORD')")
+    public ApiResponse<Void> deletePost(@PathVariable String id) {
+        postService.deletePost(id);
+        return ApiResponse.<Void>builder()
+                .code(200)
+                .message("Xóa bài đăng thành công.")
+                .build();
+    }
+
+    @GetMapping("/status")
+    public ApiResponse<List<EnumResponse>> getPostStatuses() {
+        return ApiResponse.<List<EnumResponse>>builder()
+                .code(200)
+                .data(postService.getPostsStatus())
                 .build();
     }
 
@@ -105,66 +174,6 @@ public class PostController {
                 .code(200)
                 .message("Lấy chi tiết bài đăng thành công.")
                 .data(postService.getPostById(id))
-                .build();
-    }
-
-    @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'LANDLORD')")
-    public ApiResponse<PostResponse> updatePost(@PathVariable String id, @ModelAttribute @Valid PostRequest request) {
-        return ApiResponse.<PostResponse>builder()
-                .code(200)
-                .message("Cập nhật bài đăng thành công.")
-                .data(postService.updatePost(id, request))
-                .build();
-    }
-
-    @PutMapping("/approve/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN')")
-    public ApiResponse<PostResponse> approvePost(@PathVariable String id) {
-        return ApiResponse.<PostResponse>builder()
-                .code(200)
-                .message("Duyệt bài đăng thành công.")
-                .data(postService.approvePost(id))
-                .build();
-    }
-
-    @PutMapping("/reject/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN')")
-    public ApiResponse<PostResponse> rejectPost(@PathVariable String id) {
-        return ApiResponse.<PostResponse>builder()
-                .code(200)
-                .message("Từ chối duyệt bài.")
-                .data(postService.rejectPost(id))
-                .build();
-    }
-
-    @PutMapping("/republish/{id}")
-    @PreAuthorize("hasAnyRole('LANDLORD')")
-    public ApiResponse<PostResponse> republishPost(@PathVariable String id) {
-        return ApiResponse.<PostResponse>builder()
-                .code(200)
-                .message("Đăng lại bài thành công.")
-                .data(postService.republishPost(id))
-                .build();
-    }
-
-    @PutMapping("/toggle-active-hidden/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'LANDLORD')")
-    public ApiResponse<PostResponse> toggleActiveHiddenPost(@PathVariable String id) {
-        return ApiResponse.<PostResponse>builder()
-                .code(200)
-                .message("Cập nhật trạng thái hiển thị thành silence thành công.")
-                .data(postService.toggleActiveHiddenPost(id))
-                .build();
-    }
-
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'LANDLORD')")
-    public ApiResponse<Void> deletePost(@PathVariable String id) {
-        postService.deletePost(id);
-        return ApiResponse.<Void>builder()
-                .code(200)
-                .message("Xóa bài đăng thành công.")
                 .build();
     }
 

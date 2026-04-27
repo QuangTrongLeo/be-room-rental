@@ -2,7 +2,6 @@ package tmdt.be_room_rental.dto.req.finance;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
-import tmdt.be_room_rental.enums.type.VoucherType;
 
 import java.time.LocalDate;
 

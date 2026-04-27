@@ -7,6 +7,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tmdt.be_room_rental.dto.req.post.PostRequest;
+import tmdt.be_room_rental.dto.res.enums.EnumResponse;
 import tmdt.be_room_rental.dto.res.post.PostResponse;
 import tmdt.be_room_rental.entity.Order;
 import tmdt.be_room_rental.entity.Packages;
@@ -16,6 +17,7 @@ import tmdt.be_room_rental.enums.RoleEnum;
 import tmdt.be_room_rental.enums.status.OrderStatus;
 import tmdt.be_room_rental.enums.status.PostStatus;
 import tmdt.be_room_rental.enums.type.PackageType;
+import tmdt.be_room_rental.mapper.enums.PostEnumMapper;
 import tmdt.be_room_rental.mapper.post.PostMapper;
 import tmdt.be_room_rental.repository.auth.UserRepository;
 import tmdt.be_room_rental.repository.post.PostRepository;
@@ -43,8 +45,14 @@ public class PostService implements IPostService {
     private final ICloudinaryService cloudinaryService;
     private final SecurityService securityService;
     private final TaskScheduler taskScheduler;
+    private final PostEnumMapper postEnumMapper;
     private final PostMapper postMapper;
     private static final int MAX_IMAGES = 8;
+
+    @Override
+    public List<EnumResponse> getPostsStatus() {
+        return postEnumMapper.toStatusResponseList();
+    }
 
     @Override
     public PostResponse createPost(PostRequest request) {
