@@ -1,7 +1,11 @@
 package tmdt.be_room_rental.service.impl.post;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.geo.Distance;
+import org.springframework.data.geo.Metrics;
+import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
+import org.springframework.data.mongodb.core.geo.GeoJsonPolygon;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -42,6 +46,7 @@ public class PostService implements IPostService {
     private final PackageService packageService;
     private final InventoryService inventoryService;
     private final IPostHistoryService postHistoryService;
+    private final LocationService locationService;
     private final ICloudinaryService cloudinaryService;
     private final SecurityService securityService;
     private final TaskScheduler taskScheduler;
@@ -249,6 +254,30 @@ public class PostService implements IPostService {
     @Override
     public List<PostResponse> getRejectPosts() {
         return postMapper.toResponseList(postRepository.findAllByStatusOrderByCreatedAtDesc(PostStatus.REJECTED));
+    }
+
+    @Override
+    public List<PostResponse> getPostsByProvince(String province) {
+        // 1. Lấy ranh giới (danh sách các điểm) của tỉnh từ API
+        List<Double[]> coords = locationService.getProvincePolygon(province);
+
+        if (coords == null || coords.isEmpty()) {
+            return List.of();
+        }
+
+        // 2. Chuyển đổi sang GeoJsonPolygon
+        List<Point> points = coords.stream()
+                .map(c -> new Point(c[0], c[1])) // [Longitude, Latitude]
+                .toList();
+
+        // Lưu ý: Điểm đầu và điểm cuối của Polygon phải trùng nhau để khép kín vùng
+        GeoJsonPolygon provinceArea = new GeoJsonPolygon(points);
+
+        // 3. Truy vấn DB: "Lấy bài đăng có location nằm trong vùng này"
+        List<Post> posts = postRepository.findByLocationWithinAndStatus(provinceArea, PostStatus.ACTIVE);
+
+        // 4. Trả về kết quả
+        return postMapper.toResponseList(posts);
     }
 
     @Override

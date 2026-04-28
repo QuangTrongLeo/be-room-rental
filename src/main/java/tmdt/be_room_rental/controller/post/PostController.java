@@ -168,6 +168,15 @@ public class PostController {
                 .build();
     }
 
+    @GetMapping("/province")
+    public ApiResponse<List<PostResponse>> getPostsByProvince(@RequestParam String province) {
+        return ApiResponse.<List<PostResponse>>builder()
+                .code(200)
+                .message("Lấy danh sách bài đăng tại " + province + " thành công.")
+                .data(postService.getPostsByProvince(province))
+                .build();
+    }
+
     @GetMapping("/{id}")
     public ApiResponse<PostResponse> getPostById(@PathVariable String id) {
         return ApiResponse.<PostResponse>builder()
@@ -177,7 +186,7 @@ public class PostController {
                 .build();
     }
 
-    @GetMapping("/my-history")
+    @GetMapping("/history")
     @PreAuthorize("isAuthenticated()")
     public ApiResponse<List<PostHistoryResponse>> getMyPostHistory() {
         return ApiResponse.<List<PostHistoryResponse>>builder()

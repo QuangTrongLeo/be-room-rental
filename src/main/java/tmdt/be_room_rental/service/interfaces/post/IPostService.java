@@ -22,5 +22,6 @@ public interface IPostService {
     List<PostResponse> getActivePosts();
     List<PostResponse> getHiddenPosts();
     List<PostResponse> getRejectPosts();
+    List<PostResponse> getPostsByProvince(String province);
     void deletePost(String id);
 }
