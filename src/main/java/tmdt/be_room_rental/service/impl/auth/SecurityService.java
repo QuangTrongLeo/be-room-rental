@@ -18,6 +18,6 @@ public class SecurityService {
                 .getName();
 
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Không tìm thất user"));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
     }
 }

@@ -20,7 +20,7 @@ import java.util.List;
 public class PostController {
 
     private final IPostService postService;
-    private final IPostHistoryService postHistoryService;
+    private final IPostHistoryService postHistoryService;   
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'LANDLORD')")
