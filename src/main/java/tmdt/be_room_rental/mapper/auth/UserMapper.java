@@ -20,6 +20,8 @@ public class UserMapper {
                 .avatar(user.getAvatar())
                 .rating(user.getRating())
                 .role(user.getRole())
+                .isVerified(user.isVerified())
+                .isActive(user.isActive())
                 .build();
     }
 

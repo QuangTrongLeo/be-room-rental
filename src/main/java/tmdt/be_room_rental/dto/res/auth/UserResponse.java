@@ -14,4 +14,6 @@ public class UserResponse {
     private String avatar;
     private Double rating;
     private RoleEnum role;
+    private boolean isVerified;
+    private boolean isActive;
 }

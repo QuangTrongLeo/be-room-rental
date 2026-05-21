@@ -40,6 +40,16 @@ public class UserController {
                 .build();
     }
 
+    @PutMapping("/{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<Void> toggleUserStatus(@PathVariable String id, @RequestParam boolean isActive) {
+        userService.toggleUserStatus(id, isActive);
+        return ApiResponse.<Void>builder()
+                .code(HttpStatus.OK.value())
+                .message(isActive ? "Kích hoạt tài khoản thành công." : "Khóa tài khoản thành công.")
+                .build();
+    }
+
     @GetMapping("/{id}")
     public ApiResponse<UserResponse> getUserById(@PathVariable String id) {
         UserResponse userResponse = userService.getUserById(id);
