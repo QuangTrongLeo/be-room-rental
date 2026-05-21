@@ -213,9 +213,10 @@ public class PostService implements IPostService {
     public PostResponse getPostById(String id) {
         Post post = findPostById(id);
         post.setViews(post.getViews() + 1);
-        String currentUserId = securityService.getCurrentUser().getId();
-        if (currentUserId != null) {
-            postHistoryService.saveHistory(currentUserId, id);
+
+        User currentUser = securityService.getCurrentUser();
+        if (currentUser != null && currentUser.getId() != null) {
+            postHistoryService.saveHistory(currentUser.getId(), id);
         }
         return postMapper.toResponse(postRepository.save(post));
     }
