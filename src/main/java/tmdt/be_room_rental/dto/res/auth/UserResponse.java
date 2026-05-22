@@ -1,5 +1,6 @@
 package tmdt.be_room_rental.dto.res.auth;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 import tmdt.be_room_rental.enums.RoleEnum;
@@ -14,6 +15,10 @@ public class UserResponse {
     private String avatar;
     private Double rating;
     private RoleEnum role;
+
+    @JsonProperty("isVerified")
     private boolean isVerified;
+
+    @JsonProperty("isActive")
     private boolean isActive;
 }

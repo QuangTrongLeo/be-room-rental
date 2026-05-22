@@ -5,9 +5,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import tmdt.be_room_rental.dto.req.chat.AIChatRequest;
 import tmdt.be_room_rental.dto.req.chat.ChatRoomRequest;
 import tmdt.be_room_rental.dto.res.ApiResponse;
 import tmdt.be_room_rental.dto.res.chat.ChatRoomResponse;
+import tmdt.be_room_rental.service.interfaces.chat.IChatAIService;
 import tmdt.be_room_rental.service.interfaces.chat.IChatRoomService;
 
 @RestController
@@ -16,6 +18,7 @@ import tmdt.be_room_rental.service.interfaces.chat.IChatRoomService;
 public class ChatController {
 
     private final IChatRoomService chatRoomService;
+    private final IChatAIService chatAIService;
 
     /**
      * Lấy hoặc tạo phòng chat giữa user hiện tại và targetUserId.
@@ -41,6 +44,18 @@ public class ChatController {
                 .code(HttpStatus.OK.value())
                 .message("Lấy phòng chat thành công.")
                 .data(response)
+                .build();
+    }
+
+    @PostMapping("/ai")
+    @PreAuthorize("hasAnyRole('USER', 'LANDLORD')")
+    public ApiResponse<Object> chatAI(@Valid @RequestBody AIChatRequest request) {
+        Object aiResponse = chatAIService.chatAI(request);
+
+        return ApiResponse.<Object>builder()
+                .code(HttpStatus.OK.value())
+                .message("Trợ lý AI phản hồi thành công.")
+                .data(aiResponse)
                 .build();
     }
 }
