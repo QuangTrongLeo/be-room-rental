@@ -76,6 +76,21 @@ public class InventoryService implements IInventoryService {
         inventoryRepository.save(inventory);
     }
 
+    @Transactional
+    public void refundInventory(String userId, PackageType type, PackageTier tier) {
+        // 1. Tìm gói trong kho, nếu không có thì tạo mới thực thể Inventory
+        Inventory inventory = findInventory(userId, type, tier)
+                .orElseGet(() -> buildInventory(userId, Packages.builder().type(type).tier(tier).build()));
+
+        // 2. Định nghĩa số dư bằng Integer (Bảo vệ an toàn nếu dữ liệu trong DB bị null)
+        Integer currentBalance = (inventory.getBalance() != null) ? inventory.getBalance() : Integer.valueOf(0);
+
+        // 3. Tăng lượt dùng và lưu lại vào DB
+        inventory.setBalance(currentBalance + 1);
+
+        inventoryRepository.save(inventory);
+    }
+
     /**
      * Logic truy vấn dùng chung cho cả việc nạp tiền và kiểm tra lượt
      */
