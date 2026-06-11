@@ -1,0 +1,27 @@
+# docker-compose.server.yml
+# Dùng trên SERVER để kéo image đã build sẵn và chạy container
+# Sử dụng: docker compose -f docker-compose.server.yml up -d
+
+services:
+  be-room-rental:
+    image: vantrandevops/be-room-rental:latest
+    container_name: be-room-rental
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: room-rental-cloudflared
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      - be-room-rental
