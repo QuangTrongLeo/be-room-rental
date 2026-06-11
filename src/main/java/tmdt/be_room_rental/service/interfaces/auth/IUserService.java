@@ -14,4 +14,5 @@ public interface IUserService {
     UserResponse getUserById(String id);
     List<UserResponse> getUsers();
     void deleteUser(String id);
+    void toggleUserStatus(String id, boolean isActive);
 }

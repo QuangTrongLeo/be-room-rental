@@ -5,9 +5,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import tmdt.be_room_rental.dto.req.chat.AIChatRequest;
 import tmdt.be_room_rental.dto.req.chat.ChatRoomRequest;
+import tmdt.be_room_rental.dto.req.chat.MessageNotificationRequest;
 import tmdt.be_room_rental.dto.res.ApiResponse;
 import tmdt.be_room_rental.dto.res.chat.ChatRoomResponse;
+import tmdt.be_room_rental.enums.type.NotificationType;
+import tmdt.be_room_rental.service.impl.auth.SecurityService;
+import tmdt.be_room_rental.service.impl.notification.NotificationService;
+import tmdt.be_room_rental.service.interfaces.chat.IChatAIService;
 import tmdt.be_room_rental.service.interfaces.chat.IChatRoomService;
 
 @RestController
@@ -16,6 +22,9 @@ import tmdt.be_room_rental.service.interfaces.chat.IChatRoomService;
 public class ChatController {
 
     private final IChatRoomService chatRoomService;
+    private final IChatAIService chatAIService;
+    private final NotificationService notificationService;
+    private final SecurityService securityService;
 
     /**
      * Lấy hoặc tạo phòng chat giữa user hiện tại và targetUserId.
@@ -43,4 +52,50 @@ public class ChatController {
                 .data(response)
                 .build();
     }
+
+    @PostMapping("/ai")
+    @PreAuthorize("hasAnyRole('USER', 'LANDLORD')")
+    public ApiResponse<Object> chatAI(@Valid @RequestBody AIChatRequest request) {
+        Object aiResponse = chatAIService.chatAI(request);
+
+        return ApiResponse.<Object>builder()
+                .code(HttpStatus.OK.value())
+                .message("Trợ lý AI phản hồi thành công.")
+                .data(aiResponse)
+                .build();
+    }
+
+    /**
+     * Gửi thông báo tin nhắn mới cho người nhận.
+     * FE gọi endpoint này sau khi gửi tin nhắn thành công qua Firebase.
+     * <p>
+     * Request Body: { "recipientId": "<id người nhận>", "messagePreview": "Nội dung..." }
+     */
+    @PostMapping("/notify-message")
+    @PreAuthorize("hasAnyRole('USER', 'LANDLORD')")
+    public ApiResponse<Void> notifyNewMessage(@Valid @RequestBody MessageNotificationRequest request) {
+        var currentUser = securityService.getCurrentUser();
+
+        // Cắt preview nếu quá dài
+        String preview = request.getMessagePreview();
+        if (preview != null && preview.length() > 100) {
+            preview = preview.substring(0, 100) + "...";
+        }
+
+        notificationService.sendNotification(
+                request.getRecipientId(),
+                currentUser.getId(),
+                currentUser.getUsername(),
+                NotificationType.NEW_MESSAGE,
+                "💬 Tin nhắn mới từ " + currentUser.getUsername(),
+                preview != null ? preview : "Bạn có một tin nhắn mới",
+                null // refId — không cần cho tin nhắn
+        );
+
+        return ApiResponse.<Void>builder()
+                .code(HttpStatus.OK.value())
+                .message("Đã gửi thông báo tin nhắn mới.")
+                .build();
+    }
 }
+

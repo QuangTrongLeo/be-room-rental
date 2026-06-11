@@ -96,6 +96,13 @@ public class UserService implements IUserService {
         userRepository.deleteById(id);
     }
 
+    @Override
+    public void toggleUserStatus(String id, boolean isActive) {
+        User user = findUserById(id);
+        user.setActive(isActive);
+        userRepository.save(user);
+    }
+
     public User getUserByEmail(String email){
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));

@@ -1,4 +1,4 @@
-package tmdt.be_room_rental.controller.auth; // Bạn có thể đổi lại package nếu cần (vd: .controller.user)
+package tmdt.be_room_rental.controller.auth;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -40,8 +40,17 @@ public class UserController {
                 .build();
     }
 
+    @PutMapping("/{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<Void> toggleUserStatus(@PathVariable String id, @RequestParam boolean isActive) {
+        userService.toggleUserStatus(id, isActive);
+        return ApiResponse.<Void>builder()
+                .code(HttpStatus.OK.value())
+                .message(isActive ? "Kích hoạt tài khoản thành công." : "Khóa tài khoản thành công.")
+                .build();
+    }
+
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'LANDLORD', 'USER')")
     public ApiResponse<UserResponse> getUserById(@PathVariable String id) {
         UserResponse userResponse = userService.getUserById(id);
         return ApiResponse.<UserResponse>builder()
@@ -52,7 +61,6 @@ public class UserController {
     }
 
     @GetMapping
-    // CHANGE FOR TEST
     @PreAuthorize("hasAnyRole('ADMIN', 'LANDLORD', 'USER')")
     public ApiResponse<List<UserResponse>> getUsers() {
         List<UserResponse> users = userService.getUsers();

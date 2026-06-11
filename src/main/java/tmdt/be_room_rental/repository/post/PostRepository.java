@@ -1,6 +1,10 @@
 package tmdt.be_room_rental.repository.post;
 
+import org.springframework.data.geo.Distance;
+import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
+import org.springframework.data.mongodb.core.geo.GeoJsonPolygon;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 import tmdt.be_room_rental.entity.Post;
 import tmdt.be_room_rental.enums.status.PostStatus;
@@ -14,4 +18,7 @@ public interface PostRepository extends MongoRepository<Post, String> {
     List<Post> findAllByLandlordIdOrderByCreatedAtDesc(String landlordId);
     List<Post> findAllByStatusOrderByCreatedAtDesc(PostStatus status);
     List<Post> findAllByOrderByCreatedAtDesc();
+
+    @Query("{ 'location' : { '$geoWithin' : { '$geometry' : ?0 } }, 'status' : ?1 }")
+    List<Post> findByLocationWithinAndStatus(GeoJsonPolygon polygon, PostStatus status);
 }

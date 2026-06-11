@@ -2,7 +2,6 @@ package tmdt.be_room_rental.dto.res.finance;
 
 import lombok.Builder;
 import lombok.Data;
-import tmdt.be_room_rental.enums.type.VoucherType;
 
 import java.time.LocalDateTime;
 

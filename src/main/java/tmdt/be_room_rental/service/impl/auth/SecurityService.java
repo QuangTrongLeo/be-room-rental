@@ -1,6 +1,7 @@
 package tmdt.be_room_rental.service.impl.auth;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import tmdt.be_room_rental.entity.User;
@@ -12,12 +13,17 @@ public class SecurityService {
     private final UserRepository userRepository;
 
     public User getCurrentUser() {
-        String email = SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getName();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        // Kiểm tra nếu chưa xác thực hoặc là user ẩn danh (chưa đăng nhập)
+        if (authentication == null || !authentication.isAuthenticated() ||
+                "anonymousUser".equals(authentication.getName())) {
+            return null;
+        }
+
+        String email = authentication.getName();
 
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Không tìm thất user"));
+                .orElse(null); // Trả về null thay vì ném lỗi để logic phía sau tự xử lý
     }
 }
