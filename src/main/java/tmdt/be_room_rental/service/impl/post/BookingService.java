@@ -187,6 +187,12 @@ public class BookingService implements IBookingService {
         return bookingMapper.toResponse(saved);
     }
 
+    @Override
+    public List<BookingResponse> getBookings() {
+        List<Booking> bookings = bookingRepository.findAllByOrderByCreatedAtDesc();
+        return bookingMapper.toResponseList(bookings);
+    }
+
     // ===================== CHUNG =====================
 
     @Override

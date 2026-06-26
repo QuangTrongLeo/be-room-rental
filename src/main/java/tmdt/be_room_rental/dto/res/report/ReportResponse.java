@@ -14,7 +14,7 @@ public class ReportResponse {
     private String id;
     private String reporterId;
     private String reporterUsername;
-    private RoleEnum reporterRole;
+    private RoleEnum reporterRole;  
     private String targetId;
     private String targetTitle;
     private String targetUsername;

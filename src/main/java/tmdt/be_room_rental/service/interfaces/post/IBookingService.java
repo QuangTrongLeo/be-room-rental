@@ -17,6 +17,8 @@ public interface IBookingService {
     BookingResponse approveBooking(String bookingId);
     BookingResponse rejectBooking(String bookingId);
 
+    List<BookingResponse> getBookings();
+
     // Chung
     BookingResponse getBookingById(String bookingId);
 }

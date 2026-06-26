@@ -121,4 +121,14 @@ public class BookingController {
                 .data(bookingService.getBookingById(id))
                 .build();
     }
+
+    @GetMapping()
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<List<BookingResponse>> getBookings() {
+        return ApiResponse.<List<BookingResponse>>builder()
+                .code(200)
+                .message("Lấy toàn bộ danh sách lịch hẹn hệ thống thành công (Admin).")
+                .data(bookingService.getBookings())
+                .build();
+    }
 }
