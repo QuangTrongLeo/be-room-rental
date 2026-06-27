@@ -92,6 +92,12 @@ public class UserService implements IUserService {
     }
 
     @Override
+    public List<UserResponse> getBannedUsers() {
+        List<User> bannedUsers = userRepository.findByIsActive(false);
+        return userMapper.toResponseList(bannedUsers);
+    }
+
+    @Override
     public void deleteUser(String id) {
         userRepository.deleteById(id);
     }

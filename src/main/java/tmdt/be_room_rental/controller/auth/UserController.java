@@ -70,4 +70,15 @@ public class UserController {
                 .data(users)
                 .build();
     }
+
+    @GetMapping("/banned")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<List<UserResponse>> getBannedUsers() {
+        List<UserResponse> bannedUsers = userService.getBannedUsers();
+        return ApiResponse.<List<UserResponse>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Lấy danh sách người dùng bị khóa thành công.")
+                .data(bannedUsers)
+                .build();
+    }
 }

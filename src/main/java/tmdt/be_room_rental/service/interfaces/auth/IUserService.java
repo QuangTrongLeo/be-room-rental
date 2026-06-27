@@ -13,6 +13,7 @@ public interface IUserService {
     UserResponse getMyProfile();
     UserResponse getUserById(String id);
     List<UserResponse> getUsers();
+    List<UserResponse> getBannedUsers();
     void deleteUser(String id);
     void toggleUserStatus(String id, boolean isActive);
 }
