@@ -115,6 +115,36 @@ public class BookingService implements IBookingService {
         return bookingMapper.toResponse(saved);
     }
 
+    @Override
+    public BookingResponse confirmRented(String bookingId) {
+        User currentUser = requireCurrentUser();
+        Booking booking = findBookingById(bookingId);
+
+        if (!booking.getUserId().equals(currentUser.getId())) {
+            throw new RuntimeException("Ban khong co quyen xac nhan booking nay.");
+        }
+        if (booking.getStatus() != BookingStatus.APPROVED) {
+            throw new RuntimeException("Chi co the xac nhan da thue sau khi landlord da duyet lich hen.");
+        }
+
+        booking.setStatus(BookingStatus.RENTED);
+        Booking saved = bookingRepository.save(booking);
+
+        Post post = postRepository.findById(booking.getPostId()).orElse(null);
+        String postTitle = post != null ? post.getTitle() : "phong tro";
+        notificationService.sendNotification(
+                booking.getLandlordId(),
+                currentUser.getId(),
+                currentUser.getUsername(),
+                NotificationType.BOOKING_RENTED,
+                "Nguoi thue da xac nhan thue tro",
+                currentUser.getUsername() + " da xac nhan da thue \"" + postTitle + "\".",
+                bookingId
+        );
+
+        return bookingMapper.toResponse(saved);
+    }
+
     // ===================== LANDLORD =====================
 
     @Override
@@ -209,6 +239,14 @@ public class BookingService implements IBookingService {
     }
 
     // ===================== PRIVATE =====================
+
+    private User requireCurrentUser() {
+        User currentUser = securityService.getCurrentUser();
+        if (currentUser == null) {
+            throw new RuntimeException("Ban can dang nhap de su dung chuc nang nay.");
+        }
+        return currentUser;
+    }
 
     private Booking findBookingById(String bookingId) {
         return bookingRepository.findById(bookingId)

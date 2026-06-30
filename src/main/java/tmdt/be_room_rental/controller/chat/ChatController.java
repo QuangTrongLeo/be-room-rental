@@ -9,12 +9,15 @@ import tmdt.be_room_rental.dto.req.chat.AIChatRequest;
 import tmdt.be_room_rental.dto.req.chat.ChatRoomRequest;
 import tmdt.be_room_rental.dto.req.chat.MessageNotificationRequest;
 import tmdt.be_room_rental.dto.res.ApiResponse;
+import tmdt.be_room_rental.dto.res.auth.UserResponse;
 import tmdt.be_room_rental.dto.res.chat.ChatRoomResponse;
 import tmdt.be_room_rental.enums.type.NotificationType;
 import tmdt.be_room_rental.service.impl.auth.SecurityService;
 import tmdt.be_room_rental.service.impl.notification.NotificationService;
 import tmdt.be_room_rental.service.interfaces.chat.IChatAIService;
 import tmdt.be_room_rental.service.interfaces.chat.IChatRoomService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/chat")
@@ -50,6 +53,16 @@ public class ChatController {
                 .code(HttpStatus.OK.value())
                 .message("Lấy phòng chat thành công.")
                 .data(response)
+                .build();
+    }
+
+    @GetMapping("/contacts")
+    @PreAuthorize("hasAnyRole('USER', 'LANDLORD')")
+    public ApiResponse<List<UserResponse>> getContacts() {
+        return ApiResponse.<List<UserResponse>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Lấy danh sách liên hệ chat thành công.")
+                .data(chatRoomService.getContacts())
                 .build();
     }
 

@@ -6,7 +6,11 @@ import tmdt.be_room_rental.dto.req.post.ReviewRequest;
 import tmdt.be_room_rental.dto.res.post.ReviewResponse;
 import tmdt.be_room_rental.entity.Review;
 import tmdt.be_room_rental.entity.User;
+import tmdt.be_room_rental.enums.RoleEnum;
+import tmdt.be_room_rental.enums.status.BookingStatus;
 import tmdt.be_room_rental.mapper.post.ReviewMapper;
+import tmdt.be_room_rental.repository.auth.UserRepository;
+import tmdt.be_room_rental.repository.post.BookingRepository;
 import tmdt.be_room_rental.repository.post.ReviewRepository;
 import tmdt.be_room_rental.service.impl.auth.SecurityService;
 import tmdt.be_room_rental.service.interfaces.post.IReviewService;
@@ -21,70 +25,65 @@ public class ReviewService implements IReviewService {
     private final ReviewRepository reviewRepository;
     private final ReviewMapper reviewMapper;
     private final SecurityService securityService;
+    private final UserRepository userRepository;
+    private final BookingRepository bookingRepository;
 
     @Override
     public ReviewResponse createReview(ReviewRequest request) {
-        // 1. Lấy user đang đăng nhập
-        User currentUser = securityService.getCurrentUser();
+        User currentUser = requireCurrentUser();
+        User landlord = requireLandlord(request.getLandlordId());
 
-        // 2. Khởi tạo thực thể Review
+        if (!bookingRepository.existsByUserIdAndLandlordIdAndStatus(
+                currentUser.getId(), landlord.getId(), BookingStatus.RENTED)) {
+            throw new RuntimeException("Ban chi co the danh gia chu tro sau khi da xac nhan thue tro.");
+        }
+        if (reviewRepository.existsByUserIdAndLandlordId(currentUser.getId(), landlord.getId())) {
+            throw new RuntimeException("Ban da danh gia chu tro nay roi.");
+        }
+
         Review review = Review.builder()
                 .userId(currentUser.getId())
-                .landlordId(request.getLandlordId())
+                .landlordId(landlord.getId())
                 .rating(request.getRating())
-                .comment(request.getComment())
+                .comment(request.getComment().trim())
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        // 3. Lưu và trả về DTO thông qua mapper
-        return reviewMapper.toResponse(reviewRepository.save(review));
+        Review saved = reviewRepository.save(review);
+        refreshLandlordRating(landlord.getId());
+        return reviewMapper.toResponse(saved);
     }
 
     @Override
     public ReviewResponse updateReview(String id, ReviewRequest request) {
-        // 1. Tìm review
         Review review = findReviewById(id);
-        User currentUser = securityService.getCurrentUser();
+        User currentUser = requireCurrentUser();
 
-        // 2. Kiểm tra quyền
         if (!review.getUserId().equals(currentUser.getId())) {
-            throw new RuntimeException("Bạn không có quyền chỉnh sửa đánh giá này");
+            throw new RuntimeException("Ban khong co quyen chinh sua danh gia nay");
         }
 
-        // 3. Cập nhật thông tin bằng cách kiểm tra if
-        boolean isChanged = false;
+        review.setRating(request.getRating());
+        review.setComment(request.getComment().trim());
+        review.setCreatedAt(LocalDateTime.now());
 
-        if (request.getRating() > 0) {
-            review.setRating(request.getRating());
-            isChanged = true;
-        }
-
-        if (request.getComment() != null && !request.getComment().trim().isEmpty()) {
-            review.setComment(request.getComment());
-            isChanged = true;
-        }
-
-        // 4. Nếu có bất kỳ sự thay đổi nào, cập nhật lại thời gian
-        if (isChanged) {
-            review.setCreatedAt(LocalDateTime.now());
-        }
-
-        // 5. Lưu và trả về
-        return reviewMapper.toResponse(reviewRepository.save(review));
+        Review saved = reviewRepository.save(review);
+        refreshLandlordRating(saved.getLandlordId());
+        return reviewMapper.toResponse(saved);
     }
 
     @Override
     public void deleteReview(String id) {
-        // 1. Tìm review
         Review review = findReviewById(id);
-        User currentUser = securityService.getCurrentUser();
+        User currentUser = requireCurrentUser();
 
-        // 2. Kiểm tra quyền: Chỉ người viết hoặc ADMIN mới được xóa
         if (!review.getUserId().equals(currentUser.getId())) {
-            throw new RuntimeException("Bạn không có quyền xóa đánh giá này");
+            throw new RuntimeException("Ban khong co quyen xoa danh gia nay");
         }
 
+        String landlordId = review.getLandlordId();
         reviewRepository.delete(review);
+        refreshLandlordRating(landlordId);
     }
 
     @Override
@@ -95,6 +94,41 @@ public class ReviewService implements IReviewService {
 
     private Review findReviewById(String id) {
         return reviewRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Đánh giá không tồn tại với ID: " + id));
+                .orElseThrow(() -> new RuntimeException("Danh gia khong ton tai voi ID: " + id));
+    }
+
+    private User requireCurrentUser() {
+        User currentUser = securityService.getCurrentUser();
+        if (currentUser == null) {
+            throw new RuntimeException("Ban can dang nhap de su dung chuc nang danh gia.");
+        }
+        return currentUser;
+    }
+
+    private User requireLandlord(String landlordId) {
+        if (landlordId == null || landlordId.trim().isEmpty()) {
+            throw new RuntimeException("Landlord id is required");
+        }
+        User landlord = userRepository.findById(landlordId)
+                .orElseThrow(() -> new RuntimeException("Chu tro khong ton tai"));
+        if (landlord.getRole() != RoleEnum.LANDLORD) {
+            throw new RuntimeException("Nguoi duoc danh gia phai la LANDLORD");
+        }
+        return landlord;
+    }
+
+    private void refreshLandlordRating(String landlordId) {
+        User landlord = userRepository.findById(landlordId).orElse(null);
+        if (landlord == null) {
+            return;
+        }
+
+        List<Review> reviews = reviewRepository.findAllByLandlordIdOrderByCreatedAtDesc(landlordId);
+        double average = reviews.stream()
+                .mapToInt(Review::getRating)
+                .average()
+                .orElse(0.0);
+        landlord.setRating(average);
+        userRepository.save(landlord);
     }
 }

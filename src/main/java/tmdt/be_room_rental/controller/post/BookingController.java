@@ -62,6 +62,16 @@ public class BookingController {
                 .build();
     }
 
+    @PutMapping("/{id}/confirm-rented")
+    @PreAuthorize("hasRole('USER')")
+    public ApiResponse<BookingResponse> confirmRented(@PathVariable String id) {
+        return ApiResponse.<BookingResponse>builder()
+                .code(200)
+                .message("Da xac nhan ban da thue tro tai day.")
+                .data(bookingService.confirmRented(id))
+                .build();
+    }
+
     // ===================== LANDLORD =====================
 
     /**

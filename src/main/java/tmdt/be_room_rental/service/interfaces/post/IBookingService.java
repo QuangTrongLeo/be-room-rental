@@ -11,6 +11,7 @@ public interface IBookingService {
     BookingResponse createBooking(BookingRequest request);
     List<BookingResponse> getMyBookings();
     BookingResponse cancelBooking(String bookingId);
+    BookingResponse confirmRented(String bookingId);
 
     // Landlord
     List<BookingResponse> getBookingsForLandlord();

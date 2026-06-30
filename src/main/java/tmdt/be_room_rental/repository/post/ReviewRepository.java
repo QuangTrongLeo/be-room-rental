@@ -10,4 +10,5 @@ import java.util.List;
 public interface ReviewRepository extends MongoRepository<Review, String> {
     List<Review> findAllByLandlordIdOrderByCreatedAtDesc(String landlordId);
     List<Review> findAllByUserIdOrderByCreatedAtDesc(String userId);
+    boolean existsByUserIdAndLandlordId(String userId, String landlordId);
 }

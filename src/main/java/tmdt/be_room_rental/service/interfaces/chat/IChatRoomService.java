@@ -1,6 +1,9 @@
 package tmdt.be_room_rental.service.interfaces.chat;
 
+import tmdt.be_room_rental.dto.res.auth.UserResponse;
 import tmdt.be_room_rental.dto.res.chat.ChatRoomResponse;
+
+import java.util.List;
 
 public interface IChatRoomService {
 
@@ -12,4 +15,6 @@ public interface IChatRoomService {
      * @return ChatRoomResponse chứa roomId để FE kết nối Firebase
      */
     ChatRoomResponse getOrCreateRoom(String targetUserId);
+
+    List<UserResponse> getContacts();
 }

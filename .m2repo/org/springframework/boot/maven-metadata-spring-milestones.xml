@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata modelVersion="1.1.0">
+  <plugins>
+    <plugin>
+      <name>Unnamed - [inherited]:spring-boot-maven-plugin:maven-plugin:[inherited]</name>
+      <prefix>spring-boot</prefix>
+      <artifactId>spring-boot-maven-plugin</artifactId>
+    </plugin>
+  </plugins>
+</metadata>

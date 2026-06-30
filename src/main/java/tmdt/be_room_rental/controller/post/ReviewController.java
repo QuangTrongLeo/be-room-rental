@@ -19,7 +19,7 @@ public class ReviewController {
     private final IReviewService reviewService;
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('USER', 'LANDLORD', 'ADMIN')")
+    @PreAuthorize("hasRole('USER')")
     public ApiResponse<ReviewResponse> createReview(@RequestBody @Valid ReviewRequest request) {
         return ApiResponse.<ReviewResponse>builder()
                 .code(200)
@@ -29,7 +29,7 @@ public class ReviewController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('USER', 'LANDLORD', 'ADMIN')")
+    @PreAuthorize("hasRole('USER')")
     public ApiResponse<ReviewResponse> updateReview(
             @PathVariable String id,
             @RequestBody @Valid ReviewRequest request) {
@@ -41,7 +41,7 @@ public class ReviewController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('USER', 'LANDLORD', 'ADMIN')")
+    @PreAuthorize("hasRole('USER')")
     public ApiResponse<Void> deleteReview(@PathVariable String id) {
         reviewService.deleteReview(id);
         return ApiResponse.<Void>builder()

@@ -11,9 +11,11 @@ import tmdt.be_room_rental.entity.Report;
 import tmdt.be_room_rental.entity.Post;
 import tmdt.be_room_rental.entity.User;
 import tmdt.be_room_rental.enums.RoleEnum;
+import tmdt.be_room_rental.enums.status.BookingStatus;
 import tmdt.be_room_rental.enums.status.ReportStatus;
 import tmdt.be_room_rental.mapper.report.ReportMapper;
 import tmdt.be_room_rental.repository.auth.UserRepository;
+import tmdt.be_room_rental.repository.post.BookingRepository;
 import tmdt.be_room_rental.repository.post.PostRepository;
 import tmdt.be_room_rental.repository.report.ReportRepository;
 import tmdt.be_room_rental.service.impl.auth.SecurityService;
@@ -39,6 +41,8 @@ class ReportServiceTest {
     private PostRepository postRepository;
     @Mock
     private SecurityService securityService;
+    @Mock
+    private BookingRepository bookingRepository;
 
     private ReportService reportService;
 
@@ -49,6 +53,7 @@ class ReportServiceTest {
                 userRepository,
                 postRepository,
                 securityService,
+                bookingRepository,
                 new ReportMapper()
         );
     }
@@ -63,6 +68,8 @@ class ReportServiceTest {
         when(securityService.getCurrentUser()).thenReturn(reporter);
         when(postRepository.findById(room.getId())).thenReturn(Optional.of(room));
         when(userRepository.findById(landlord.getId())).thenReturn(Optional.of(landlord));
+        when(bookingRepository.existsByUserIdAndPostIdAndStatus(
+                reporter.getId(), room.getId(), BookingStatus.RENTED)).thenReturn(true);
         when(reportRepository.existsByUserIdAndTargetIdAndStatus(
                 reporter.getId(), room.getId(), ReportStatus.PENDING)).thenReturn(false);
         when(reportRepository.save(any(Report.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -95,6 +102,8 @@ class ReportServiceTest {
 
         when(securityService.getCurrentUser()).thenReturn(reporter);
         when(userRepository.findById(target.getId())).thenReturn(Optional.of(target));
+        when(bookingRepository.existsByLandlordIdAndUserIdAndStatus(
+                reporter.getId(), target.getId(), BookingStatus.RENTED)).thenReturn(true);
         when(reportRepository.existsByUserIdAndTargetIdAndStatus(
                 reporter.getId(), target.getId(), ReportStatus.PENDING)).thenReturn(true);
 

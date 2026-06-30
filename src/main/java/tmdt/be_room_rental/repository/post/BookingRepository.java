@@ -19,4 +19,6 @@ public interface BookingRepository extends MongoRepository<Booking, String> {
     List<Booking> findAllByLandlordIdAndStatusOrderByCreatedAtDesc(String landlordId, BookingStatus status);
     // Kiểm tra trùng booking
     boolean existsByUserIdAndPostIdAndStatus(String userId, String postId, BookingStatus status);
+    boolean existsByUserIdAndLandlordIdAndStatus(String userId, String landlordId, BookingStatus status);
+    boolean existsByLandlordIdAndUserIdAndStatus(String landlordId, String userId, BookingStatus status);
 }

@@ -8,10 +8,12 @@ import tmdt.be_room_rental.entity.Post;
 import tmdt.be_room_rental.entity.Report;
 import tmdt.be_room_rental.entity.User;
 import tmdt.be_room_rental.enums.RoleEnum;
+import tmdt.be_room_rental.enums.status.BookingStatus;
 import tmdt.be_room_rental.enums.status.ReportStatus;
 import tmdt.be_room_rental.enums.type.ReportType;
 import tmdt.be_room_rental.mapper.report.ReportMapper;
 import tmdt.be_room_rental.repository.auth.UserRepository;
+import tmdt.be_room_rental.repository.post.BookingRepository;
 import tmdt.be_room_rental.repository.post.PostRepository;
 import tmdt.be_room_rental.repository.report.ReportRepository;
 import tmdt.be_room_rental.service.impl.auth.SecurityService;
@@ -28,6 +30,7 @@ public class ReportService implements IReportService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final SecurityService securityService;
+    private final BookingRepository bookingRepository;
     private final ReportMapper reportMapper;
 
     @Override
@@ -39,27 +42,35 @@ public class ReportService implements IReportService {
 
         if (reporter.getRole() == RoleEnum.USER) {
             targetPost = postRepository.findById(request.getTargetId())
-                    .orElseThrow(() -> new RuntimeException("Phòng bị báo cáo không tồn tại"));
+                    .orElseThrow(() -> new RuntimeException("Phong bi bao cao khong ton tai"));
             target = userRepository.findById(targetPost.getLandlordId())
-                    .orElseThrow(() -> new RuntimeException("Chủ trọ của phòng không tồn tại"));
+                    .orElseThrow(() -> new RuntimeException("Chu tro cua phong khong ton tai"));
             if (target.getRole() != RoleEnum.LANDLORD) {
-                throw new RuntimeException("Bài đăng không thuộc tài khoản LANDLORD");
+                throw new RuntimeException("Bai dang khong thuoc tai khoan LANDLORD");
+            }
+            if (!bookingRepository.existsByUserIdAndPostIdAndStatus(
+                    reporter.getId(), targetPost.getId(), BookingStatus.RENTED)) {
+                throw new RuntimeException("Ban chi co the bao cao phong sau khi da xac nhan thue tro.");
             }
             reportType = ReportType.ROOM;
         } else if (reporter.getRole() == RoleEnum.LANDLORD) {
             target = userRepository.findById(request.getTargetId())
-                    .orElseThrow(() -> new RuntimeException("Người thuê bị báo cáo không tồn tại"));
+                    .orElseThrow(() -> new RuntimeException("Nguoi thue bi bao cao khong ton tai"));
             if (target.getRole() != RoleEnum.USER) {
-                throw new RuntimeException("LANDLORD chỉ có thể báo cáo USER");
+                throw new RuntimeException("LANDLORD chi co the bao cao USER");
+            }
+            if (!bookingRepository.existsByLandlordIdAndUserIdAndStatus(
+                    reporter.getId(), target.getId(), BookingStatus.RENTED)) {
+                throw new RuntimeException("Chi co the bao cao USER da xac nhan thue tro voi ban.");
             }
             reportType = ReportType.USER;
         } else {
-            throw new RuntimeException("Vai trò hiện tại không thể gửi báo cáo");
+            throw new RuntimeException("Vai tro hien tai khong the gui bao cao");
         }
 
         if (reportRepository.existsByUserIdAndTargetIdAndStatus(
                 reporter.getId(), request.getTargetId(), ReportStatus.PENDING)) {
-            throw new RuntimeException("Bạn đã có một báo cáo đang chờ xử lý cho đối tượng này");
+            throw new RuntimeException("Ban da co mot bao cao dang cho xu ly cho doi tuong nay");
         }
 
         Report report = Report.builder()
@@ -88,7 +99,7 @@ public class ReportService implements IReportService {
     @Override
     public ReportResponse resolveReport(String id) {
         Report report = reportRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Báo cáo không tồn tại"));
+                .orElseThrow(() -> new RuntimeException("Bao cao khong ton tai"));
         report.setStatus(ReportStatus.RESOLVED);
         return toResponse(reportRepository.save(report));
     }
@@ -96,7 +107,7 @@ public class ReportService implements IReportService {
     private User requireCurrentUser() {
         User currentUser = securityService.getCurrentUser();
         if (currentUser == null) {
-            throw new RuntimeException("Bạn cần đăng nhập để sử dụng tính năng báo cáo");
+            throw new RuntimeException("Ban can dang nhap de su dung tinh nang bao cao");
         }
         return currentUser;
     }
